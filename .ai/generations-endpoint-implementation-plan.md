@@ -5,7 +5,7 @@ Celem tego endpointa jest generowanie propozycji fiszek przez AI na podstawie po
 
 ## 2. Szczegóły żądania
 - Metoda HTTP: POST
-- Struktura URL: /flashcards/generate
+- Struktura URL: /generations
 - Parametry:
   - Wymagane:
     - `text` (string, długość od 1000 do 10000 znaków)
@@ -105,7 +105,7 @@ Celem tego endpointa jest generowanie propozycji fiszek przez AI na podstawie po
 - Monitorowanie obciążenia oraz rate limiting endpointu w celu zapobiegania nadużyciom.
 
 ## 9. Etapy wdrożenia
-1. Utworzenie nowego endpointa `POST /flashcards/generate` w katalogu `src/pages/api`.
+1. Utworzenie nowego endpointa `POST /generations` w katalogu `src/pages/api`.
 2. Implementacja walidacji danych wejściowych przy użyciu zod oraz sprawdzenie ograniczenia długości tekstu.
 3. Wdrożenie mechanizmu autoryzacji, weryfikacja tokena JWT.
 4. Integracja z zewnętrznym serwisem LLM:
