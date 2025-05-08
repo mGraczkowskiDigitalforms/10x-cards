@@ -106,7 +106,7 @@ export interface FlashcardProposalDto {
  */
 export interface GenerationCreateResponseDto {
   generation: GenerationDto;
-  flashcardsProposal: FlashcardProposalDto[];
+  flashcards_proposal: FlashcardProposalDto[];
 }
 
 /**

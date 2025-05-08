@@ -181,7 +181,7 @@
         "generated_count": "number",
         "created_at": "timestamp"
       },
-      "flashcardsProposal": [
+      "flashcards_proposal": [
         {
           "id": "number",
           "front": "string",
