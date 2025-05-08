@@ -61,26 +61,23 @@
   - **Error Codes**: 404 Not Found, 401 Unauthorized
 
 - **POST /flashcards**
-  - **Description**: Creates one or multiple flashcards.
+  - **Description**: Create one or more flashcards (manually or from AI generation).
   - **Request JSON**:
     ```json
     {
       "flashcards": [
         {
+          "id": "number",
           "front": "string (max 200 chars)",
           "back": "string (max 500 chars)",
           "source": "string ('ai-full', 'ai-edited', or 'manual')",
-          "generation_id": "number (optional)"
+          "generation_id": "number (optional)",
+          "created_at": "timestamp",
+          "updated_at": "timestamp"
         }
       ]
     }
     ```
-  - **Validations**:
-    - `flashcards`: Array must not be empty
-    - `front`: Required, string, min length 1, max length 200
-    - `back`: Required, string, min length 1, max length 500
-    - `source`: Required, must be one of: 'ai-full', 'ai-edited', 'manual'
-    - `generation_id`: Optional, must be a positive integer, required when source is 'ai-full' or 'ai-edited'
   - **Response JSON**:
     ```json
     {
@@ -90,7 +87,9 @@
           "front": "string",
           "back": "string",
           "source": "string",
-          "generation_id": "number"
+          "generation_id": "number",
+          "created_at": "timestamp",
+          "updated_at": "timestamp"
         }
       ],
       "message": "Flashcards creation completed"
@@ -112,6 +111,11 @@
     ```
   - **Success Codes**: 201 Created
   - **Error Codes**: 400 Bad Request, 401 Unauthorized
+  - **Validations**:
+    - `front`: Required, string, min length 1, max length 200
+    - `back`: Required, string, min length 1, max length 500
+    - `source`: Required, must be one of: 'ai-full', 'ai-edited', 'manual'
+    - `generation_id`: Optional, must be a positive integer, required when source is 'ai-full' or 'ai-edited'
 
 - **PUT /flashcards/{id}**
   - **Description**: Updates an existing flashcard.
@@ -159,7 +163,7 @@
 
 ### 2.3 Flashcards Generation Endpoints
 
-- **POST /flashcards/generate**
+- **POST /generations**
   - **Description**: Generates flashcards proposals using AI based on provided text input.
   - **Request JSON**:
     ```json
@@ -183,7 +187,6 @@
       },
       "flashcards_proposal": [
         {
-          "id": "number",
           "front": "string",
           "back": "string",
           "source": "ai-full",
