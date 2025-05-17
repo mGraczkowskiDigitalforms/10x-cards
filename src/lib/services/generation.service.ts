@@ -1,12 +1,13 @@
 import crypto from 'crypto';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient, User } from '@supabase/supabase-js';
 import type { Database } from '../../db/database.types';
 import type { FlashcardProposalDto, GenerationCreateResponseDto } from '../../types';
 import { OpenRouterService } from '../openrouter.service';
 import { createOpenRouterConfigFromEnv } from '../openrouter.config';
-import { DEFAULT_USER_ID } from '../../db/supabase.client';
 
 // AI Service error types
+const DEFAULT_MODEL = 'gpt-4o-mini';
+
 type AiServiceError = {
   code: 'TIMEOUT' | 'API_ERROR' | 'INVALID_RESPONSE';
   message: string;
@@ -14,12 +15,15 @@ type AiServiceError = {
 
 export class GenerationService {
   private readonly openRouter: OpenRouterService;
+  private readonly user: User;
 
   constructor(
-    private readonly supabaseClient: SupabaseClient<Database>
+    private readonly supabaseClient: SupabaseClient<Database>,
+    user: User
   ) {
+    this.user = user;
     this.openRouter = new OpenRouterService(createOpenRouterConfigFromEnv({
-      defaultModel: 'gpt-4o-mini',
+      defaultModel: DEFAULT_MODEL,
       defaultParameters: {
         temperature: 0.7,
         top_p: 1,
@@ -94,14 +98,6 @@ Example response format:
       const response = await this.openRouter.sendChatMessage(text);
       
       try {
-        // Log raw response for debugging
-        console.log('OpenRouter raw response:', {
-          status: response.choices?.[0]?.finish_reason,
-          content: response.choices?.[0]?.message?.content?.substring(0, 200) + '...',
-          model: response.model,
-          usage: response.usage
-        });
-
         // Parse the response
         const responseData = JSON.parse(response.choices[0].message.content);
         
@@ -149,11 +145,12 @@ Example response format:
       const aiError = error as AiServiceError;
       
       await this.logGenerationError({
-        userId: DEFAULT_USER_ID,
+        userId: this.user.id,
         errorCode: aiError.code || 'API_ERROR',
         errorMessage: aiError.message || 'Unknown AI service error',
         sourceTextHash: this.generateTextHash(text),
-        sourceTextLength: text.length
+        sourceTextLength: text.length,
+        model: DEFAULT_MODEL
       });
 
       throw new Error(`AI Service error: ${aiError.message || 'Unknown error'}`);
@@ -176,6 +173,7 @@ Example response format:
     errorMessage: string;
     sourceTextHash: string;
     sourceTextLength: number;
+    model:string;
   }) {
     try {
       const timestamp = new Date().toISOString();
@@ -187,7 +185,7 @@ Example response format:
           error_message: params.errorMessage,
           source_text_hash: params.sourceTextHash,
           source_text_length: params.sourceTextLength,
-          model: 'gpt-4'
+          model: params.model
         });
 
       if (error) {
@@ -213,6 +211,7 @@ Example response format:
     textLength: number;
     flashcardsCount: number;
     generationDuration: number;
+    model: string;
   }) {
     // Check for existing generation with the same hash
     const existingGeneration = await this.checkExistingGeneration(params.userId, params.sourceTextHash);
@@ -223,7 +222,8 @@ Example response format:
         errorCode: 'DUPLICATE_HASH',
         errorMessage: 'Generation with this text hash already exists',
         sourceTextHash: params.sourceTextHash,
-        sourceTextLength: params.textLength
+        sourceTextLength: params.textLength,
+        model: params.model
       });
       throw new Error('Flashcards for this text have already been generated. Please use different text or check your existing flashcards.');
     }
@@ -232,7 +232,7 @@ Example response format:
       .from('generations')
       .insert({
         user_id: params.userId,
-        model: 'gpt-4',
+        model: DEFAULT_MODEL,
         generated_count: params.flashcardsCount,
         source_text_hash: params.sourceTextHash,
         source_text_length: params.textLength,
@@ -247,7 +247,8 @@ Example response format:
         errorCode: 'DB_ERROR',
         errorMessage: generationError.message,
         sourceTextHash: params.sourceTextHash,
-        sourceTextLength: params.textLength
+        sourceTextLength: params.textLength,
+        model: params.model
       });
       throw new Error(generationError instanceof Error ? generationError.message : 'Failed to generate flashcards. Please try again.');
     }
@@ -270,6 +271,7 @@ Example response format:
         textLength: text.length,
         flashcardsCount: flashcardsProposal.length,
         generationDuration,
+        model: DEFAULT_MODEL
       });
 
       return {
@@ -286,7 +288,8 @@ Example response format:
         errorCode: 'GENERATION_ERROR',
         errorMessage: error instanceof Error ? error.message : 'Unknown error',
         sourceTextHash: this.generateTextHash(text),
-        sourceTextLength: text.length
+        sourceTextLength: text.length,
+        model: DEFAULT_MODEL
       });
       
       throw new Error(error instanceof Error ? error.message : 'Failed to generate flashcards. Please try again.');
