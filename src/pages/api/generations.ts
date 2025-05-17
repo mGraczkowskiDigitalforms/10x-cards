@@ -40,8 +40,7 @@ export const POST: APIRoute = async ({ request }) => {
   } catch (error) {
     console.error('Error processing flashcard generation request:', error);
     return new Response(JSON.stringify({ 
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Failed to generate flashcards. Please try again.'
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }

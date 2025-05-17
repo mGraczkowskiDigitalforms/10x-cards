@@ -2,26 +2,9 @@ import crypto from 'crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../../db/database.types';
 import type { FlashcardProposalDto, GenerationCreateResponseDto } from '../../types';
-import { AiService } from './ai.service';
-
-// Mock API service response
-const mockApiResponse = [
-  {
-    front: "What is the capital of France?",
-    back: "Paris",
-    source: "ai-full"
-  },
-  {
-    front: "What is the largest planet in our solar system?",
-    back: "Jupiter",
-    source: "ai-full"
-  },
-  {
-    front: "Who wrote 'Romeo and Juliet'?",
-    back: "William Shakespeare",
-    source: "ai-full"
-  }
-] as const;
+import { OpenRouterService } from '../openrouter.service';
+import { createOpenRouterConfigFromEnv } from '../openrouter.config';
+import { DEFAULT_USER_ID } from '../../db/supabase.client';
 
 // AI Service error types
 type AiServiceError = {
@@ -30,12 +13,69 @@ type AiServiceError = {
 };
 
 export class GenerationService {
-  private readonly aiService: AiService;
+  private readonly openRouter: OpenRouterService;
 
   constructor(
     private readonly supabaseClient: SupabaseClient<Database>
   ) {
-    this.aiService = new AiService();
+    this.openRouter = new OpenRouterService(createOpenRouterConfigFromEnv({
+      defaultModel: 'gpt-4o-mini',
+      defaultParameters: {
+        temperature: 0.7,
+        top_p: 1,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+        max_tokens: 1000
+      }
+    }));
+
+    // Set up system message for flashcard generation
+    this.openRouter.setSystemMessage(`You are a helpful AI assistant that creates high-quality flashcards from provided text.
+Your task is to generate concise and effective flashcards following these rules:
+
+1. Create clear, focused questions for the front and concise, accurate answers for the back
+2. Each flashcard should test a single concept
+3. Questions should promote active recall
+4. Avoid yes/no questions
+5. Keep both sides concise but complete
+6. Use clear, simple language
+7. Maintain factual accuracy
+8. Include 5-10 most important concepts from the text
+9. Flashcards should be written in the language of the provided text
+
+IMPORTANT: You must respond ONLY with a valid JSON object containing a "flashcards" array. Each flashcard in the array must have exactly two properties: "front" and "back". Do not include any explanations or additional text.
+
+Example response format:
+{
+  "flashcards": [
+    {
+      "front": "What is the capital of France?",
+      "back": "Paris"
+    }
+  ]
+}`);
+
+    // Set response format to ensure proper JSON structure
+    this.openRouter.setResponseFormat({
+      name: "flashcards",
+      schema: {
+        type: "object",
+        properties: {
+          flashcards: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                front: { type: "string" },
+                back: { type: "string" }
+              },
+              required: ["front", "back"]
+            }
+          }
+        },
+        required: ["flashcards"]
+      }
+    });
   }
 
   private generateTextHash(text: string): string {
@@ -47,12 +87,69 @@ export class GenerationService {
 
   private async callAiService(text: string): Promise<FlashcardProposalDto[]> {
     try {
-      return await this.aiService.generateFlashcards(text);
+      // Set the user's text as input
+      this.openRouter.setUserMessage(text);
+      
+      // Get response from OpenRouter
+      const response = await this.openRouter.sendChatMessage(text);
+      
+      try {
+        // Log raw response for debugging
+        console.log('OpenRouter raw response:', {
+          status: response.choices?.[0]?.finish_reason,
+          content: response.choices?.[0]?.message?.content?.substring(0, 200) + '...',
+          model: response.model,
+          usage: response.usage
+        });
+
+        // Parse the response
+        const responseData = JSON.parse(response.choices[0].message.content);
+        
+        // Validate response structure
+        if (!responseData || typeof responseData !== 'object' || !Array.isArray(responseData.flashcards)) {
+          throw new Error('Invalid response structure: expected object with flashcards array');
+        }
+
+        // Validate and transform each flashcard
+        return responseData.flashcards.map((card: unknown, index: number) => {
+          if (!card || typeof card !== 'object') {
+            throw new Error(`Flashcard at index ${index} is not an object`);
+          }
+
+          const typedCard = card as { front?: string; back?: string };
+          
+          if (!typedCard.front || !typedCard.back) {
+            throw new Error(`Flashcard at index ${index} is missing required properties`);
+          }
+
+          return {
+            front: typedCard.front,
+            back: typedCard.back,
+            source: 'ai-full' as const
+          };
+        });
+      } catch (parseError: unknown) {
+        if (parseError instanceof Error) {
+          throw new Error(`Invalid response format: ${parseError.message}`);
+        }
+        throw new Error('Invalid response format: Unknown parsing error');
+      }
     } catch (error) {
+      // Log detailed error information
+      console.error('OpenRouter API error:', {
+        error: error instanceof Error ? {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        } : error,
+        responseError: error instanceof Error && 'response' in error ? 
+          await (error as any).response?.text() : undefined
+      });
+
       const aiError = error as AiServiceError;
       
       await this.logGenerationError({
-        userId: 'system',
+        userId: DEFAULT_USER_ID,
         errorCode: aiError.code || 'API_ERROR',
         errorMessage: aiError.message || 'Unknown AI service error',
         sourceTextHash: this.generateTextHash(text),
@@ -79,7 +176,6 @@ export class GenerationService {
     errorMessage: string;
     sourceTextHash: string;
     sourceTextLength: number;
-    metadata?: Record<string, unknown>;
   }) {
     try {
       const timestamp = new Date().toISOString();
@@ -91,12 +187,7 @@ export class GenerationService {
           error_message: params.errorMessage,
           source_text_hash: params.sourceTextHash,
           source_text_length: params.sourceTextLength,
-          model: 'gpt-4-mock',
-          metadata: {
-            timestamp,
-            environment: process.env.NODE_ENV || 'development',
-            ...params.metadata
-          }
+          model: 'gpt-4'
         });
 
       if (error) {
@@ -134,14 +225,14 @@ export class GenerationService {
         sourceTextHash: params.sourceTextHash,
         sourceTextLength: params.textLength
       });
-      throw new Error('Generation with this text already exists');
+      throw new Error('Flashcards for this text have already been generated. Please use different text or check your existing flashcards.');
     }
 
     const { data: generation, error: generationError } = await this.supabaseClient
       .from('generations')
       .insert({
         user_id: params.userId,
-        model: 'gpt-4-mock',
+        model: 'gpt-4',
         generated_count: params.flashcardsCount,
         source_text_hash: params.sourceTextHash,
         source_text_length: params.textLength,
@@ -158,7 +249,7 @@ export class GenerationService {
         sourceTextHash: params.sourceTextHash,
         sourceTextLength: params.textLength
       });
-      throw new Error(`Failed to save generation: ${generationError.message}`);
+      throw new Error(generationError instanceof Error ? generationError.message : 'Failed to generate flashcards. Please try again.');
     }
 
     return generation;
@@ -197,7 +288,8 @@ export class GenerationService {
         sourceTextHash: this.generateTextHash(text),
         sourceTextLength: text.length
       });
-      throw error;
+      
+      throw new Error(error instanceof Error ? error.message : 'Failed to generate flashcards. Please try again.');
     }
   }
 } 

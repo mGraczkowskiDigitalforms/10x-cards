@@ -34,7 +34,8 @@ export function GenerateView() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate flashcards. Please try again.');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate flashcards. Please try again.');
       }
 
       const data: GenerationCreateResponseDto = await response.json();
