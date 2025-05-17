@@ -6,11 +6,7 @@ import { toast } from 'sonner';
 import { AuthLayout } from './AuthLayout';
 import { AuthInput } from './AuthInput';
 
-interface ForgotPasswordFormProps {
-  onSubmit: (email: string) => Promise<void>;
-}
-
-export function ForgotPasswordForm({ onSubmit }: ForgotPasswordFormProps) {
+export function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{
@@ -43,8 +39,27 @@ export function ForgotPasswordForm({ onSubmit }: ForgotPasswordFormProps) {
     setIsLoading(true);
 
     try {
-      await onSubmit(email);
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send reset instructions');
+      }
+
       toast.success('Password reset instructions have been sent to your email.');
+      setEmail(''); // Clear the form
+      
+      // Redirect to login page after short delay to show the success message
+      setTimeout(() => {
+        window.location.href = '/auth/login';
+      }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
