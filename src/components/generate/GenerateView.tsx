@@ -12,7 +12,11 @@ export interface FlashcardProposalViewModel extends FlashcardProposalDto {
   rejected: boolean;
 }
 
-export function GenerateView() {
+interface GenerateViewProps {
+  userId: string;
+}
+
+export function GenerateView({ userId }: GenerateViewProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [proposals, setProposals] = useState<FlashcardProposalViewModel[]>([]);
@@ -102,6 +106,7 @@ export function GenerateView() {
           <BulkSaveButton
             flashcards={proposals}
             generationId={generationId}
+            userId={userId}
             disabled={loading}
             onSuccess={handleSaveSuccess}
           />

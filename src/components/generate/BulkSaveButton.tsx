@@ -7,13 +7,15 @@ import type { FlashcardProposalViewModel } from './GenerateView';
 interface BulkSaveButtonProps {
   flashcards: FlashcardProposalViewModel[];
   generationId: number | null;
+  userId: string;
   disabled?: boolean;
   onSuccess?: () => void;
 }
 
 export function BulkSaveButton({ 
   flashcards, 
-  generationId, 
+  generationId,
+  userId,
   disabled = false,
   onSuccess 
 }: BulkSaveButtonProps) {
@@ -50,7 +52,8 @@ export function BulkSaveButton({
             front: card.front,
             back: card.back,
             source: card.edited ? 'ai-edited' : 'ai-full',
-            generation_id: generationId
+            generation_id: generationId,
+            user_id: userId
           }))
         }),
       });
