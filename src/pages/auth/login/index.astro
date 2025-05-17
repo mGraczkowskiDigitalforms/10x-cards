@@ -1,0 +1,12 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { LoginForm } from '@/components/auth/LoginForm';
+import { Toaster } from '@/components/ui/sonner';
+---
+
+<Layout title="Login - 10X Cards">
+  <main class="container mx-auto px-4 py-8">
+    <LoginForm client:load />
+    <Toaster client:load />
+  </main>
+</Layout> 
