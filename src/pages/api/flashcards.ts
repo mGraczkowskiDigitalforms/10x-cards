@@ -1,7 +1,6 @@
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import type { CreateFlashcardsCommand, FlashcardCreateDto } from '../../types';
-import { supabaseClient, DEFAULT_USER_ID } from '../../db/supabase.client';
 import { FlashcardService, FlashcardServiceError } from '../../lib/services/flashcard.service';
 
 // Validation schema for individual flashcard
@@ -29,8 +28,18 @@ const createFlashcardsSchema = z.object({
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
+    // Verify user is authenticated
+    if (!locals.user) {
+      return new Response(JSON.stringify({
+        error: 'Unauthorized - User not authenticated'
+      }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     // Parse and validate request body
     const body = await request.json();
     const validationResult = createFlashcardsSchema.safeParse(body);
@@ -45,10 +54,10 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    const flashcardService = new FlashcardService(supabaseClient);
+    const flashcardService = new FlashcardService(locals.supabase);
     const createdFlashcards = await flashcardService.createFlashcards(
       validationResult.data.flashcards,
-      DEFAULT_USER_ID
+      locals.user.id
     );
 
     return new Response(JSON.stringify({
