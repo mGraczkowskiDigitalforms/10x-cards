@@ -2,6 +2,20 @@
 import Layout from '@/layouts/Layout.astro';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { Toaster } from '@/components/ui/sonner';
+import { createSupabaseServerInstance } from '@/db/supabase.server';
+
+// Check if user is already logged in
+const supabase = createSupabaseServerInstance({
+  cookies: Astro.cookies,
+  headers: Astro.request.headers,
+});
+
+const { data: { user } } = await supabase.auth.getUser();
+
+// If user is logged in, redirect to generate page
+if (user) {
+  return Astro.redirect('/generate');
+}
 ---
 
 <Layout title="Login - 10X Cards">

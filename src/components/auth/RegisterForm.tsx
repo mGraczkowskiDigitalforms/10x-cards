@@ -6,11 +6,7 @@ import { toast } from 'sonner';
 import { AuthLayout } from './AuthLayout';
 import { AuthInput } from './AuthInput';
 
-interface RegisterFormProps {
-  onSubmit: (email: string, password: string) => Promise<void>;
-}
-
-export function RegisterForm({ onSubmit }: RegisterFormProps) {
+export function RegisterForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -59,8 +55,24 @@ export function RegisterForm({ onSubmit }: RegisterFormProps) {
     setIsLoading(true);
 
     try {
-      await onSubmit(email, password);
-      toast.success('Registration successful! Please check your email for verification.');
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to register');
+      }
+
+      toast.success('Registration successful!');
+      
+      // Redirect to main page
+      window.location.href = '/';
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {

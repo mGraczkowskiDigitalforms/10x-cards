@@ -10,6 +10,7 @@
 
 // Import the Database type from the database models
 import type { Database } from "./db/database.types";
+import type { SupabaseClient, User } from '@supabase/supabase-js';
 
 // Define reusable types based on the database models
 export type Flashcard = Database['public']['Tables']['flashcards']['Row'];
@@ -124,3 +125,9 @@ export type GenerationErrorLogDto = Pick<
 GenerationErrorLog, 
 'id' | 'user_id' | 'error_code' | 'error_message' | 'source_text_length' | 'source_text_hash' | 'model' | 'created_at'
 >;
+
+// Locals types
+export interface AstroLocals {
+  supabase: SupabaseClient<Database>;
+  user: User | null;
+}

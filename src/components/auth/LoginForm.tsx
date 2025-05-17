@@ -6,11 +6,7 @@ import { toast } from 'sonner';
 import { AuthLayout } from './AuthLayout';
 import { AuthInput } from './AuthInput';
 
-interface LoginFormProps {
-  onSubmit: (email: string, password: string) => Promise<void>;
-}
-
-export function LoginForm({ onSubmit }: LoginFormProps) {
+export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -49,8 +45,22 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
     setIsLoading(true);
 
     try {
-      await onSubmit(email, password);
-      toast.success('Login successful!');
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to login');
+      }
+
+      // Redirect to main page
+      window.location.href = '/';
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
