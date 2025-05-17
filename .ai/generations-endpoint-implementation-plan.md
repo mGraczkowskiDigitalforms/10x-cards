@@ -29,7 +29,7 @@ Celem tego endpointa jest generowanie propozycji fiszek przez AI na podstawie po
   {
     "generation": {
       "id": 1,
-      "model": "gpt-4",
+      "model": "gpt-4-mini",
       "generated_count": 5,
       "created_at": "2023-10-01T12:00:00Z"
     },

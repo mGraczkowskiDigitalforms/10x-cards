@@ -87,7 +87,7 @@ _Proponowane rozwiązania dla powyższych wyzwań:_
      ```
 
 5. **Konfiguracja ustawień modelu:**
-   - Umożliw konfigurację nazwy modelu (np. "gpt-4") oraz parametrów modelu, takich jak temperature (np. 0.7), max_tokens itp.
+   - Umożliw konfigurację nazwy modelu (np. "gpt-4-mini") oraz parametrów modelu, takich jak temperature (np. 0.7), max_tokens itp.
 
 6. **Implementacja obsługi błędów:**
    - Zaimplementuj mechanizmy obsługi błędów zgodnie z opisanymi wyżej scenariuszami.
@@ -102,7 +102,7 @@ _Proponowane rozwiązania dla powyższych wyzwań:_
    - Zdefiniuj odpowiedź API korzystającą ze schematu JSON, np.:
      { "type": "json_schema", "json_schema": { "name": "chatResponse", "strict": true, "schema": { "message": "string", "status": "number" } } }
 4. **Model Name:**
-   - Określ nazwę modelu bezpośrednio w konfiguracji (np. "gpt-4").
+   - Określ nazwę modelu bezpośrednio w konfiguracji (np. "gpt-4-mini").
 5. **Model Parameters:**
    - Skonfiguruj parametry, takie jak temperature, max_tokens oraz sekwencje zatrzymania (stop sequences), np.: { "temperature": 0.7, "max_tokens": 150 }.
 
