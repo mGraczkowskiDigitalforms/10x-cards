@@ -28,6 +28,9 @@ The project utilizes a modern technology stack to ensure efficiency and maintain
 - **Styling:** TailwindCSS
 - **UI Components & Icons:** Radix UI, Lucide React
 - **Utility Libraries:** clsx, class-variance-authority, tailwind-merge, tw-animate-css
+- **Testing:**
+  - **Unit Testing:** Vitest, React Testing Library, MSW (Mock Service Worker)
+  - **E2E Testing:** Playwright
 - **Tooling:** ESLint, Prettier, TypeScript
 
 ## Getting Started Locally
