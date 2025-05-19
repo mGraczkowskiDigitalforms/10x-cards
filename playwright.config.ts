@@ -1,26 +1,26 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 
-// Load environment variables from .env.test
+// Load test environment variables
 dotenv.config({ path: '.env.test' });
 
 // Ensure required environment variables are set
 const requiredEnvVars = {
   SUPABASE_URL: process.env.SUPABASE_URL || 'http://localhost:54321',
-  SUPABASE_KEY: process.env.SUPABASE_PUBLIC_KEY || 'dummy-key',
+  SUPABASE_KEY: process.env.SUPABASE_KEY || 'dummy-key',
 };
 
 export default defineConfig({
   testDir: './tests/e2e',
   timeout: 30000,
-  fullyParallel: false,
-  workers: 1,
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3001',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -28,19 +28,31 @@ export default defineConfig({
 
   projects: [
     {
+      name: 'cleanup db',
+      testMatch: /global\.teardown\.ts/,
+    },
+    {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-    }
+      teardown: 'cleanup db',
+    },
   ],
 
   webServer: {
-    command: `SUPABASE_URL=${requiredEnvVars.SUPABASE_URL} SUPABASE_KEY=${requiredEnvVars.SUPABASE_KEY} NODE_ENV=test npm run dev`,
-    port: 3000,
+    command: 'npm run dev:e2e',
+    port: 3001,
     reuseExistingServer: !process.env.CI,
+    timeout: 120000,
     env: {
       NODE_ENV: 'test',
-      SUPABASE_URL: requiredEnvVars.SUPABASE_URL,
-      SUPABASE_KEY: requiredEnvVars.SUPABASE_KEY,
+      SUPABASE_URL: process.env.SUPABASE_URL!,
+      SUPABASE_KEY: process.env.SUPABASE_KEY!,
+      E2E_USERNAME_ID: process.env.E2E_USERNAME_ID!,
+      E2E_USERNAME: process.env.E2E_USERNAME!,
+      E2E_PASSWORD: process.env.E2E_PASSWORD!,
+      OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY!,
+      OPENROUTER_BASE_URL: process.env.OPENROUTER_BASE_URL!,
+      OPENROUTER_REFERER: process.env.OPENROUTER_REFERER!,
     },
   },
 }); 
