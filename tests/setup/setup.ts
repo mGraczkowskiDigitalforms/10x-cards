@@ -2,21 +2,20 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { setupServer } from 'msw/node';
-import { handlers } from './mocks/handlers';
 
-// Setup MSW
-export const server = setupServer(...handlers);
+// Create MSW server instance
+export const server = setupServer();
 
-// Establish API mocking before all tests
+// Setup handlers before all tests
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 
-// Reset any request handlers that we may add during the tests
+// Clean up after each test
 afterEach(() => {
-  server.resetHandlers();
   cleanup();
+  server.resetHandlers();
 });
 
-// Clean up after the tests are finished
+// Clean up after all tests
 afterAll(() => server.close());
 
 // Mock window.matchMedia
