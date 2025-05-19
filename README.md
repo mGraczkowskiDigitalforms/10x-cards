@@ -74,6 +74,12 @@ The following scripts are defined in `package.json`:
 | `npm run lint`      | Runs ESLint                          |
 | `npm run lint:fix`  | Fixes lint issues automatically      |
 | `npm run format`    | Formats code using Prettier          |
+| `npm test`          | Runs unit tests                      |
+| `npm run test:ui`   | Runs unit tests with UI              |
+| `npm run test:coverage` | Generates test coverage report    |
+| `npm run test:e2e`  | Runs E2E tests                       |
+| `npm run test:e2e:ui` | Runs E2E tests with UI             |
+| `npm run test:e2e:debug` | Runs E2E tests in debug mode    |
 
 ## Project Scope
 
@@ -109,3 +115,45 @@ Development is ongoing. Contributions, feedback, and suggestions are welcome!
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+## Testing
+
+The project uses a comprehensive testing strategy that includes both unit and E2E tests.
+
+### Unit Testing
+
+We use Vitest as our unit testing framework along with React Testing Library for component testing. Mock Service Worker (MSW) is used for API mocking.
+
+Key features:
+- Fast test execution with watch mode
+- Interactive UI for test debugging
+- Code coverage reporting
+- API mocking with MSW
+- DOM testing with jsdom
+- Component testing with React Testing Library
+
+Run unit tests:
+```sh
+npm test              # Run tests in watch mode
+npm run test:ui       # Run tests with UI
+npm run test:coverage # Generate coverage report
+```
+
+### E2E Testing
+
+End-to-end testing is handled by Playwright, focusing on Chrome/Chromium for desktop testing.
+
+Key features:
+- Automatic screenshot on test failure
+- Video recording of failed tests
+- Trace viewer for debugging
+- Interactive UI for test debugging
+- Parallel test execution
+- CI/CD integration ready
+
+Run E2E tests:
+```sh
+npm run test:e2e       # Run all E2E tests
+npm run test:e2e:ui    # Run tests with UI
+npm run test:e2e:debug # Run tests in debug mode
+```
