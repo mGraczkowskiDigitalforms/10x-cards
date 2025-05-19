@@ -118,85 +118,138 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Testing
 
-The project uses a comprehensive testing strategy that includes both unit and E2E tests. Tests are organized in the `tests` directory with the following structure:
+The project uses a comprehensive testing strategy that includes both unit and E2E tests. Tests are organized in the following structure:
 
 ```
 tests/
   ├── unit/              # Unit and component tests
-  ├── e2e/               # End-to-end tests
-  └── setup/             # Test configuration files
+  │   └── *.test.tsx    # Unit test files
+  ├── e2e/              # End-to-end tests
+  │   ├── page-objects/ # Page Object Models
+  │   │   ├── base.page.ts
+  │   │   ├── home.page.ts
+  │   │   └── counter.page.ts
+  │   └── specs/        # Test specifications
+  │       ├── home.spec.ts
+  │       └── counter.spec.ts
+  └── setup/            # Test configuration
+      └── setup.ts      # Setup file for unit tests
 ```
 
-### Unit Testing
+### Unit Testing (Vitest)
 
-We use Vitest as our unit testing framework along with React Testing Library for component testing. Mock Service Worker (MSW) is used for API mocking.
+Unit tests are written using Vitest and React Testing Library. They focus on testing individual components and functions in isolation.
 
-Key features:
-- Fast test execution with watch mode
-- Interactive UI for test debugging
-- Code coverage reporting with v8 provider
-- API mocking with MSW
-- DOM testing with jsdom
-- Component testing with React Testing Library
-- HTML test reports generation
+```bash
+# Run unit tests in watch mode
+npm test
 
-Testing guidelines:
-- Use `describe` blocks to group related tests
-- Write descriptive test names that explain the expected behavior
-- Follow the Arrange-Act-Assert pattern
-- Use `data-testid` attributes for test-specific element selection
-- Mock external dependencies and complex calculations
-- Test both success and error scenarios
-- Keep tests focused and isolated
+# Run unit tests with UI
+npm run test:ui
 
-Run unit tests:
-```sh
-npm test              # Run tests in watch mode
-npm run test:ui       # Run tests with UI
-npm run test:coverage # Generate coverage report
+# Generate coverage report
+npm run test:coverage
 ```
 
-View test reports:
-```sh
+### E2E Testing (Playwright)
+
+E2E tests use Playwright with Page Object Model pattern. They test the application from a user's perspective in a real browser environment.
+
+Available commands:
+
+```bash
+# List all available tests
+npx playwright test --list
+
+# Run all E2E tests
+npm run test:e2e
+
+# Run tests with UI
+npm run test:e2e:ui
+
+# Run tests in debug mode
+npm run test:e2e:debug
+
+# Run specific test file
+npx playwright test home.spec.ts
+
+# Run tests matching specific title
+npx playwright test -g "should increment count"
+
+# Run tests in specific group
+npx playwright test -g "accessibility"
+```
+
+### Test Reports
+
+Test results and artifacts are stored in the following locations:
+- Unit test reports: `test-reports/unit/`
+- E2E test reports: `test-reports/e2e/`
+- Coverage reports: `coverage/`
+- Playwright reports: `playwright-report/`
+
+To view test reports:
+```bash
+# For unit test reports
 npx vite preview --outDir test-reports/unit
+
+# For E2E test reports
+npx playwright show-report playwright-report
 ```
 
-### E2E Testing
+### Continuous Integration
 
-End-to-end testing is handled by Playwright, focusing on Chrome/Chromium for desktop testing.
+Tests are automatically run in GitHub Actions on:
+- Push to main branch
+- Pull requests to main branch
 
-Key features:
-- Automatic screenshot on test failure
-- Video recording of failed tests
-- Trace viewer for debugging
-- Interactive UI for test debugging
-- Parallel test execution
-- CI/CD integration ready
-- HTML test reports
+CI pipeline includes:
+- Unit tests with coverage reporting
+- E2E tests in Chromium
+- ESLint checks
+- TypeScript type checking
+- Coverage reports upload to Codecov
 
-Testing guidelines:
-- Use Page Object Model for maintainable tests
-- Leverage Playwright's built-in locators
-- Implement proper test isolation
-- Use test hooks for setup and teardown
+Test artifacts and reports are automatically uploaded and available in GitHub Actions.
+
+### Writing Tests
+
+#### Unit Tests
+- Use `describe` for test grouping
+- Follow AAA pattern (Arrange, Act, Assert)
+- Mock external dependencies
+- Test both success and error cases
+
+Example:
+```typescript
+describe('Component', () => {
+  it('should handle specific case', () => {
+    // Arrange
+    render(<Component />);
+    
+    // Act
+    userEvent.click(screen.getByRole('button'));
+    
+    // Assert
+    expect(screen.getByText('Result')).toBeInTheDocument();
+  });
+});
+```
+
+#### E2E Tests
+- Use Page Object Model for maintainability
+- Test user workflows
+- Include accessibility checks
 - Add visual regression tests when needed
-- Keep tests focused on user workflows
 
-Run E2E tests:
-```sh
-npm run test:e2e       # Run all E2E tests
-npm run test:e2e:ui    # Run tests with UI
-npm run test:e2e:debug # Run tests in debug mode
+Example:
+```typescript
+test.describe('Feature', () => {
+  test('should complete user flow', async ({ page }) => {
+    const pageObject = new PageObject(page);
+    await pageObject.goto();
+    await pageObject.performAction();
+    await pageObject.expectResult();
+  });
+});
 ```
-
-### Example Component and Test
-
-The project includes an example component (`ExampleComponent.tsx`) and its corresponding test (`tests/unit/ExampleComponent.test.tsx`) that demonstrates:
-- Component testing setup
-- Event handling testing
-- Props and state testing
-- Callback testing
-- Test organization
-- Best practices for component and test structure
-
-Review these files to understand our testing patterns and conventions.
