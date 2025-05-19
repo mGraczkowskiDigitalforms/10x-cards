@@ -118,7 +118,14 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Testing
 
-The project uses a comprehensive testing strategy that includes both unit and E2E tests.
+The project uses a comprehensive testing strategy that includes both unit and E2E tests. Tests are organized in the `tests` directory with the following structure:
+
+```
+tests/
+  ├── unit/              # Unit and component tests
+  ├── e2e/               # End-to-end tests
+  └── setup/             # Test configuration files
+```
 
 ### Unit Testing
 
@@ -127,16 +134,31 @@ We use Vitest as our unit testing framework along with React Testing Library for
 Key features:
 - Fast test execution with watch mode
 - Interactive UI for test debugging
-- Code coverage reporting
+- Code coverage reporting with v8 provider
 - API mocking with MSW
 - DOM testing with jsdom
 - Component testing with React Testing Library
+- HTML test reports generation
+
+Testing guidelines:
+- Use `describe` blocks to group related tests
+- Write descriptive test names that explain the expected behavior
+- Follow the Arrange-Act-Assert pattern
+- Use `data-testid` attributes for test-specific element selection
+- Mock external dependencies and complex calculations
+- Test both success and error scenarios
+- Keep tests focused and isolated
 
 Run unit tests:
 ```sh
 npm test              # Run tests in watch mode
 npm run test:ui       # Run tests with UI
 npm run test:coverage # Generate coverage report
+```
+
+View test reports:
+```sh
+npx vite preview --outDir test-reports/unit
 ```
 
 ### E2E Testing
@@ -150,6 +172,15 @@ Key features:
 - Interactive UI for test debugging
 - Parallel test execution
 - CI/CD integration ready
+- HTML test reports
+
+Testing guidelines:
+- Use Page Object Model for maintainable tests
+- Leverage Playwright's built-in locators
+- Implement proper test isolation
+- Use test hooks for setup and teardown
+- Add visual regression tests when needed
+- Keep tests focused on user workflows
 
 Run E2E tests:
 ```sh
@@ -157,3 +188,15 @@ npm run test:e2e       # Run all E2E tests
 npm run test:e2e:ui    # Run tests with UI
 npm run test:e2e:debug # Run tests in debug mode
 ```
+
+### Example Component and Test
+
+The project includes an example component (`ExampleComponent.tsx`) and its corresponding test (`tests/unit/ExampleComponent.test.tsx`) that demonstrates:
+- Component testing setup
+- Event handling testing
+- Props and state testing
+- Callback testing
+- Test organization
+- Best practices for component and test structure
+
+Review these files to understand our testing patterns and conventions.
