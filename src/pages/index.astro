@@ -1,7 +1,5 @@
 ---
-import Layout from "@/layouts/Layout.astro";
 import { createSupabaseServerInstance } from "@/db/supabase.server";
-import { DashboardView } from "@/components/dashboard/DashboardView";
 
 // Check if user is logged in
 const supabase = createSupabaseServerInstance({
@@ -9,24 +7,14 @@ const supabase = createSupabaseServerInstance({
   headers: Astro.request.headers,
 });
 
-const { data: { user, session } } = await supabase.auth.getUser();
+const { data: { user } } = await supabase.auth.getUser();
 
 // If user is not logged in, redirect to login page
 if (!user) {
   return Astro.redirect('/auth/login');
 }
 
-// Get last login time from session
-const lastLoginAt = session?.user?.last_sign_in_at || new Date().toISOString();
+// If user is logged in, redirect to generate page
+return Astro.redirect('/generate');
 ---
 
-<Layout title="10X Cards - Dashboard">
-  <DashboardView 
-    client:load 
-    user={{
-      id: user.id,
-      email: user.email!,
-      lastLoginAt,
-    }} 
-  />
-</Layout>

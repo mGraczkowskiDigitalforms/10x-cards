@@ -1,11 +1,41 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { GenerateView } from '../components/generate/GenerateView';
+import Layout from '@/layouts/Layout.astro';
+import { DashboardView } from '@/components/dashboard/DashboardView';
+import { createSupabaseServerInstance } from "@/db/supabase.server";
+
+// Check if user is logged in
+const supabase = createSupabaseServerInstance({
+  cookies: Astro.cookies,
+  headers: Astro.request.headers,
+});
+
+let user;
+let lastLoginAt;
+
+try {
+  const { data: { user: userData, session } } = await supabase.auth.getUser();
+
+  // If user is not logged in, redirect to login page
+  if (!userData) {
+    return Astro.redirect('/auth/login');
+  }
+
+  // Store user data and last login time
+  user = userData;
+  lastLoginAt = session?.user?.last_sign_in_at || new Date().toISOString();
+} catch (error) {
+  console.error('Error getting user:', error);
+  return Astro.redirect('/auth/login');
+}
 ---
 
 <Layout title="Generate Flashcards">
-  <main class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">Generate Flashcards</h1>
-    <GenerateView client:load />
-  </main>
+  <DashboardView 
+    client:only="react"
+    user={{
+      id: user.id,
+      email: user.email!,
+      lastLoginAt,
+    }} 
+  />
 </Layout> 
