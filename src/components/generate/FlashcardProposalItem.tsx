@@ -1,12 +1,9 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Check, X, Edit2, Save } from 'lucide-react';
-import { toast } from 'sonner';
-
-const MAX_FRONT_LENGTH = 200;
-const MAX_BACK_LENGTH = 500;
+import { useFlashcardValidation } from '@/components/hooks/useFlashcardValidation';
 
 interface FlashcardProposalItemProps {
   front: string;
@@ -14,9 +11,11 @@ interface FlashcardProposalItemProps {
   accepted: boolean;
   rejected: boolean;
   edited: boolean;
+  index: number;
   onAccept: () => void;
   onEdit: (front: string, back: string) => void;
   onReject: () => void;
+  testId?: string;
 }
 
 export function FlashcardProposalItem({
@@ -25,51 +24,59 @@ export function FlashcardProposalItem({
   accepted,
   rejected,
   edited,
+  index,
   onAccept,
   onEdit,
   onReject,
+  testId = `flashcard-proposal-${index}`,
 }: FlashcardProposalItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedFront, setEditedFront] = useState(front);
   const [editedBack, setEditedBack] = useState(back);
+  const { validateAndNotify, MAX_FRONT_LENGTH, MAX_BACK_LENGTH } = useFlashcardValidation();
 
-  const handleSaveEdit = () => {
-    if (editedFront.length > MAX_FRONT_LENGTH) {
-      toast.error(`Front text cannot exceed ${MAX_FRONT_LENGTH} characters`);
-      return;
+  const handleSaveEdit = useCallback(async () => {
+    console.log('Attempting to save edit...');
+    if (validateAndNotify(editedFront, editedBack)) {
+      console.log('Saving edit...');
+      onEdit(editedFront, editedBack);
+      setIsEditing(false);
+    } else {
+      console.log('Save validation failed, staying in edit mode');
     }
-    if (editedBack.length > MAX_BACK_LENGTH) {
-      toast.error(`Back text cannot exceed ${MAX_BACK_LENGTH} characters`);
-      return;
-    }
-    if (editedFront.trim() === '' || editedBack.trim() === '') {
-      toast.error('Both front and back text are required');
-      return;
-    }
+  }, [editedFront, editedBack, onEdit, validateAndNotify]);
 
-    onEdit(editedFront, editedBack);
+  const handleCancelEdit = useCallback(() => {
+    console.log('Canceling edit...');
+    setEditedFront(front);
+    setEditedBack(back);
     setIsEditing(false);
-  };
+  }, [front, back]);
 
-  const handleStartEdit = () => {
+  const handleStartEdit = useCallback(() => {
+    console.log('Starting edit...');
     setEditedFront(front);
     setEditedBack(back);
     setIsEditing(true);
-  };
+  }, [front, back]);
 
-  const handleFrontChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  useEffect(() => {
+    console.log('Edit mode changed:', isEditing);
+  }, [isEditing]);
+
+  const handleFrontChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value;
     if (newText.length <= MAX_FRONT_LENGTH) {
       setEditedFront(newText);
     }
-  };
+  }, [MAX_FRONT_LENGTH]);
 
-  const handleBackChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleBackChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value;
     if (newText.length <= MAX_BACK_LENGTH) {
       setEditedBack(newText);
     }
-  };
+  }, [MAX_BACK_LENGTH]);
 
   const getCardClassName = () => {
     if (accepted) return 'p-4 border-green-500';
@@ -78,7 +85,11 @@ export function FlashcardProposalItem({
   };
 
   return (
-    <Card className={getCardClassName()}>
+    <Card 
+      className={getCardClassName()} 
+      data-test-id={testId}
+      data-edit-mode={isEditing}
+    >
       <div className="space-y-4">
         {isEditing ? (
           <>
@@ -92,6 +103,7 @@ export function FlashcardProposalItem({
                 maxLength={MAX_FRONT_LENGTH}
                 placeholder="Front side text..."
                 className={editedFront.length === MAX_FRONT_LENGTH ? 'border-yellow-500' : ''}
+                data-test-id={`${testId}-edit-front`}
               />
             </div>
             <div className="space-y-2">
@@ -104,13 +116,15 @@ export function FlashcardProposalItem({
                 maxLength={MAX_BACK_LENGTH}
                 placeholder="Back side text..."
                 className={editedBack.length === MAX_BACK_LENGTH ? 'border-yellow-500' : ''}
+                data-test-id={`${testId}-edit-back`}
               />
             </div>
             <div className="flex justify-end space-x-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setIsEditing(false)}
+                onClick={handleCancelEdit}
+                data-test-id={`${testId}-cancel-edit`}
               >
                 Cancel
               </Button>
@@ -118,6 +132,7 @@ export function FlashcardProposalItem({
                 variant="default"
                 size="sm"
                 onClick={handleSaveEdit}
+                data-test-id={`${testId}-save-edit`}
               >
                 <Save className="h-4 w-4 mr-2" />
                 Save
@@ -133,7 +148,7 @@ export function FlashcardProposalItem({
                   {front.length}/{MAX_FRONT_LENGTH}
                 </span>
               </div>
-              <p className="p-2 bg-gray-50 rounded-md min-h-[2.5rem]">{front}</p>
+              <p className="p-2 bg-gray-50 rounded-md min-h-[2.5rem]" data-test-id={`${testId}-front`}>{front}</p>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between">
@@ -142,7 +157,7 @@ export function FlashcardProposalItem({
                   {back.length}/{MAX_BACK_LENGTH}
                 </span>
               </div>
-              <p className="p-2 bg-gray-50 rounded-md min-h-[2.5rem]">{back}</p>
+              <p className="p-2 bg-gray-50 rounded-md min-h-[2.5rem]" data-test-id={`${testId}-back`}>{back}</p>
             </div>
             <div className="flex justify-end space-x-2">
               {!accepted && !rejected && (
@@ -150,6 +165,7 @@ export function FlashcardProposalItem({
                   variant="outline"
                   size="sm"
                   onClick={handleStartEdit}
+                  data-test-id={`${testId}-edit`}
                 >
                   <Edit2 className="h-4 w-4 mr-2" />
                   Edit
@@ -160,6 +176,7 @@ export function FlashcardProposalItem({
                 size="sm"
                 onClick={onAccept}
                 disabled={accepted}
+                data-test-id={`${testId}-accept`}
               >
                 <Check className="h-4 w-4 mr-2" />
                 {accepted ? 'Accepted' : 'Accept'}
@@ -169,6 +186,7 @@ export function FlashcardProposalItem({
                 size="sm"
                 onClick={onReject}
                 disabled={rejected}
+                data-test-id={`${testId}-reject`}
               >
                 <X className="h-4 w-4 mr-2" />
                 {rejected ? 'Rejected' : 'Reject'}

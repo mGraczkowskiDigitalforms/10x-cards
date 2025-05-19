@@ -7,10 +7,11 @@ export interface AuthInputProps extends React.InputHTMLAttributes<HTMLInputEleme
   error?: string;
   hint?: string;
   showPasswordToggle?: boolean;
+  'data-test-id'?: string;
 }
 
 export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
-  ({ className, label, error, hint, id, type = 'text', showPasswordToggle, placeholder, ...props }, ref) => {
+  ({ className, label, error, hint, id, type = 'text', showPasswordToggle, placeholder, 'data-test-id': testId, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
     const inputId = id || label.toLowerCase().replace(/\s+/g, '-');
     const inputType = showPassword ? 'text' : type;
@@ -54,6 +55,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
               hint ? `${inputId}-hint` : 
               undefined
             }
+            data-test-id={testId}
             {...props}
           />
           
@@ -71,6 +73,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
               )}
               tabIndex={-1}
               aria-label={showPassword ? "Hide password" : "Show password"}
+              data-test-id={testId ? `${testId}-toggle` : undefined}
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />

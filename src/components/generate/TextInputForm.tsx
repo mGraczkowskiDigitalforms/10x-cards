@@ -76,7 +76,7 @@ export function TextInputForm({ onSubmit, disabled, shouldReset, isLoading }: Te
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" data-test-id="generate-form">
       <div className="space-y-2">
         <Textarea
           value={text}
@@ -85,11 +85,12 @@ export function TextInputForm({ onSubmit, disabled, shouldReset, isLoading }: Te
           placeholder="Enter your text here (1000-10000 characters)..."
           className="min-h-[200px] max-h-[400px]"
           disabled={disabled || isLoading}
+          data-test-id="generate-text-input"
         />
-        <p className={`text-sm ${text.length > 10000 ? 'text-red-500' : 'text-gray-500'}`}>
+        <p className={`text-sm ${text.length > 10000 ? 'text-red-500' : 'text-gray-500'}`} data-test-id="character-count">
           Characters: {text.length} / 10000
           {text.length < 1000 && (
-            <span className="text-yellow-500 ml-2">
+            <span className="text-yellow-500 ml-2" data-test-id="characters-needed">
               (Need {1000 - text.length} more)
             </span>
           )}
@@ -97,7 +98,7 @@ export function TextInputForm({ onSubmit, disabled, shouldReset, isLoading }: Te
       </div>
 
       {error && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" data-test-id="generate-error-alert">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -107,6 +108,7 @@ export function TextInputForm({ onSubmit, disabled, shouldReset, isLoading }: Te
         isTextValid={!error}
         textLength={text.length}
         isLoading={isLoading}
+        data-test-id="generate-submit-button"
       />
     </form>
   );

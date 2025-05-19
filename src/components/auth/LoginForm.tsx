@@ -77,11 +77,13 @@ export function LoginForm() {
         onSubmit={handleSubmit} 
         className="space-y-4"
         noValidate // Disable browser validation
+        data-test-id="login-form"
       >
         {error && (
           <ErrorAlert 
             errorMessage={error} 
             onDismiss={() => setError(null)} 
+            data-test-id="login-error-alert"
           />
         )}
 
@@ -95,6 +97,7 @@ export function LoginForm() {
           disabled={isLoading}
           placeholder="Enter your email address"
           error={fieldErrors.email}
+          data-test-id="login-email-input"
         />
 
         <AuthInput
@@ -108,12 +111,14 @@ export function LoginForm() {
           disabled={isLoading}
           placeholder="Enter your password"
           error={fieldErrors.password}
+          data-test-id="login-password-input"
         />
 
         <div className="flex items-center justify-end">
           <a 
             href="/auth/forgot-password" 
             className="text-sm font-medium text-primary hover:underline"
+            data-test-id="forgot-password-link"
           >
             Forgot password?
           </a>
@@ -123,6 +128,7 @@ export function LoginForm() {
           type="submit" 
           className="w-full" 
           disabled={isLoading}
+          data-test-id="login-submit-button"
         >
           {isLoading ? (
             <>

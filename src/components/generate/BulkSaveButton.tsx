@@ -59,7 +59,8 @@ export function BulkSaveButton({
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save flashcards');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save flashcards');
       }
 
       toast.success(
@@ -80,12 +81,13 @@ export function BulkSaveButton({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2">
+    <div className="flex flex-col sm:flex-row gap-2" data-test-id="bulk-save-container">
       <Button
         onClick={() => handleSave(false)}
         disabled={disabled || isLoading || totalCount === 0}
         className="w-full sm:w-auto"
         variant="default"
+        data-test-id="save-all-button"
       >
         {isLoading ? (
           <>
@@ -105,6 +107,7 @@ export function BulkSaveButton({
         disabled={disabled || isLoading || acceptedCount === 0}
         className="w-full sm:w-auto"
         variant="secondary"
+        data-test-id="save-accepted-button"
       >
         {isLoading ? (
           <>

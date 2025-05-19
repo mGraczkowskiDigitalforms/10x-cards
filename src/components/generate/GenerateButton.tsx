@@ -29,6 +29,7 @@ export function GenerateButton({
       disabled={disabled || !isTextValid || textLength < 1000 || isLoading}
       className="w-full sm:w-auto"
       onClick={handleClick}
+      data-test-id="generate-submit-button"
     >
       {isLoading ? (
         <>
