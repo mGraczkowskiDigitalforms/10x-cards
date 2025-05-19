@@ -1,0 +1,23 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 5%
+    patch:
+      default:
+        target: 80%
+        threshold: 5%
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+
+ignore:
+  - "tests/**/*"
+  - "**/*.d.ts"
+  - "vitest.config.ts"
+  - "playwright.config.ts" 
