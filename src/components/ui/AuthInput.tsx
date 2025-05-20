@@ -12,21 +12,29 @@ interface AuthInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
-  ({ label, error, className, type = 'text', showPasswordToggle, hint, ...props }, ref) => {
+  ({ label, error, className, type = 'text', showPasswordToggle, hint, id, name, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
     const inputType = showPassword ? 'text' : type;
+    const inputId = id || name;
 
     return (
       <div className="space-y-2">
         <Label 
-          htmlFor={props.id || props.name}
+          htmlFor={inputId}
           className={cn(error && 'text-destructive')}
         >
           {label}
         </Label>
         <div className="relative">
           <Input
+            id={inputId}
+            name={name}
             type={inputType}
+            aria-label={label}
+            aria-invalid={!!error}
+            aria-describedby={
+              error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined
+            }
             className={cn(
               'pr-10',
               error && 'border-destructive focus-visible:ring-destructive',
@@ -40,6 +48,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -50,12 +59,19 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
           )}
         </div>
         {hint && !error && (
-          <p className="text-sm text-muted-foreground">
+          <p 
+            id={`${inputId}-hint`}
+            className="text-sm text-muted-foreground"
+          >
             {hint}
           </p>
         )}
         {error && (
-          <p className="text-sm font-medium text-destructive">
+          <p 
+            id={`${inputId}-error`}
+            className="text-sm font-medium text-destructive"
+            role="alert"
+          >
             {error}
           </p>
         )}

@@ -1,14 +1,14 @@
 import { z } from 'zod';
 
 const emailSchema = z.string()
-  .email('Nieprawidłowy adres email')
-  .min(1, 'Email jest wymagany');
+  .email('Please enter a valid email address')
+  .min(1, 'Email is required');
 
 const passwordSchema = z.string()
-  .min(8, 'Hasło musi mieć minimum 8 znaków')
+  .min(8, 'Password must be at least 8 characters long')
   .regex(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-    'Hasło musi zawierać przynajmniej jedną małą literę, wielką literę i cyfrę'
+    'Password must contain at least one lowercase letter, one uppercase letter, and one number'
   );
 
 export const loginSchema = z.object({
@@ -21,7 +21,7 @@ export const registerSchema = z.object({
   password: passwordSchema,
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Hasła muszą być identyczne",
+  message: "Passwords do not match",
   path: ["confirmPassword"],
 });
 
@@ -29,7 +29,7 @@ export const resetPasswordSchema = z.object({
   password: passwordSchema,
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Hasła muszą być identyczne",
+  message: "Passwords do not match",
   path: ["confirmPassword"],
 });
 

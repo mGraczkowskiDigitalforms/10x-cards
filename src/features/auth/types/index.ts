@@ -15,6 +15,7 @@ export interface RegisterCredentials extends LoginCredentials {
 export interface ResetPasswordCredentials {
   password: string;
   confirmPassword: string;
+  token: string;
 }
 
 export interface ForgotPasswordCredentials {

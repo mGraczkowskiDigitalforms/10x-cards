@@ -8,7 +8,11 @@ import { resetPasswordSchema } from '../schemas/auth.schema';
 import { useAuthService } from '../hooks/useAuthService';
 import type { ResetPasswordCredentials } from '../types';
 
-export function ResetPasswordForm() {
+interface ResetPasswordFormProps {
+  token: string;
+}
+
+export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const { resetPassword } = useAuthService();
   const {
     register,
@@ -25,7 +29,7 @@ export function ResetPasswordForm() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await resetPassword(data);
+      await resetPassword({ ...data, token });
       window.location.href = '/auth/login';
     } catch (err) {
       setError('root', { 
