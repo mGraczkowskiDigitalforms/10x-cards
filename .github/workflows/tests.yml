@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version-file: .nvmrc
           cache: 'npm'
           
       - name: Install dependencies
@@ -42,11 +42,6 @@ jobs:
             playwright-report/
           retention-days: 30
           
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-          
   lint:
     name: Lint and Type Check
     runs-on: ubuntu-latest
@@ -57,7 +52,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version-file: .nvmrc
           cache: 'npm'
           
       - name: Install dependencies
