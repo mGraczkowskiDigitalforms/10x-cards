@@ -21,8 +21,8 @@ test.describe('Flashcard Generation Flow', () => {
 
   // Test data from .env.test
   const TEST_USER = {
-    email: 'mariusz@test.pl',
-    password: 'Test1234%'
+    email: 'test@test.pl',
+    password: 'qibquB-gecka3-muwhyb'
   };
 
   // Mock data for flashcard generation

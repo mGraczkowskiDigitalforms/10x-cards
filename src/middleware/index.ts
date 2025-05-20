@@ -10,6 +10,10 @@ const PUBLIC_PATHS = [
   '/api/auth/logout',
   '/api/auth/reset-password',
   '/api/auth/forgot-password',
+  '/auth/login',
+  '/auth/register',
+  '/auth/forgot-password',
+  '/auth/reset-password'
 ];
 
 // API paths that require authentication
@@ -44,6 +48,9 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
         headers: { 'Content-Type': 'application/json' }
       });
     }
+  } else if (!user) {
+    // For non-API paths, redirect to login if not authenticated
+    return context.redirect('/auth/login');
   }
 
   return next();

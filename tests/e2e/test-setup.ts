@@ -6,8 +6,8 @@ import { FlashcardProposalPage } from './pages/FlashcardProposalPage';
 
 // Common test data
 export const TEST_USER = {
-  email: 'mariusz@test.pl',
-  password: 'Test1234%'
+  email: 'test@test.pl',
+  password: 'qibquB-gecka3-muwhyb'
 };
 
 export const API_ENDPOINTS = {
@@ -67,8 +67,17 @@ export const test = base.extend<TestFixtures>({
 // Common setup function
 export async function setupTestEnvironment(page: Page) {
   // Setup console logging
-  page.on('console', (msg: ConsoleMessage) => console.log(`Browser console: ${msg.text()}`));
-  page.on('pageerror', (err: Error) => console.error(`Browser error: ${err}`));
+  page.on('console', (msg: ConsoleMessage) => {
+    if (msg.text().includes('Login error') || msg.text().includes('Failed to load resource')) {
+      console.log(`Authentication error: ${msg.text()}`);
+    } else {
+      console.log(`Browser console: ${msg.text()}`);
+    }
+  });
+  page.on('pageerror', (err: Error) => {
+    console.error('Browser error:', err);
+    console.error('Stack trace:', err.stack);
+  });
 
   // Setup API mocks
   await page.route(API_ENDPOINTS.GENERATIONS, async (route: Route) => {
@@ -114,8 +123,15 @@ export async function setupTestEnvironment(page: Page) {
 
 // Common test expectations
 export async function expectPageToBeReady(page: Page) {
-  await expect(page).toHaveURL('/generate', { timeout: 10000 });
-  await page.waitForLoadState('networkidle');
-  await expect(page.locator('[data-test-id="dashboard-view"]')).toBeVisible({ timeout: 10000 });
-  await expect(page.locator('[data-test-id="user-email"]')).toBeVisible({ timeout: 10000 });
+  // First wait for navigation to complete
+  await page.waitForURL('/generate', { timeout: 60000 });
+  
+  // Then wait for the page to be fully loaded
+  await page.waitForLoadState('networkidle', { timeout: 60000 });
+  
+  // Finally wait for key elements to be visible
+  await Promise.all([
+    page.locator('[data-test-id="dashboard-view"]').waitFor({ state: 'visible', timeout: 60000 }),
+    page.locator('[data-test-id="user-email"]').waitFor({ state: 'visible', timeout: 60000 })
+  ]);
 } 

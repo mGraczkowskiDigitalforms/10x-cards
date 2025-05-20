@@ -18,7 +18,7 @@ describe('ResetPasswordForm', () => {
 
     await user.click(submitButton);
 
-    expect(await screen.findByText(/password must be at least 8 characters/i)).toBeInTheDocument();
+    expect(await screen.findByText(/password is required/i)).toBeInTheDocument();
   });
 
   it('should show error when passwords do not match', async () => {

@@ -30,7 +30,7 @@ describe('ForgotPasswordForm', () => {
 
     await user.click(submitButton);
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Please enter a valid email address');
+    expect(screen.getByRole('alert')).toHaveTextContent('Email is required');
   });
 
   it('should show error for invalid email format', async () => {

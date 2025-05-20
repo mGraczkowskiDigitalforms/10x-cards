@@ -26,7 +26,7 @@ export function LoginForm() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       await login(data);
-      window.location.href = '/';
+      window.location.href = '/generate';
     } catch (err) {
       console.log('Login error:', err);
       if (err instanceof Error) {

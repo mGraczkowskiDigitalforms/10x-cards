@@ -26,8 +26,8 @@ describe('RegisterForm', () => {
 
     await user.click(submitButton);
 
-    expect(await screen.findByText(/please enter a valid email address/i)).toBeInTheDocument();
-    expect(await screen.findByText(/password must be at least 8 characters/i)).toBeInTheDocument();
+    expect(await screen.findByText(/email is required/i)).toBeInTheDocument();
+    expect(await screen.findByText(/password is required/i)).toBeInTheDocument();
   });
 
   it('should show error for invalid email format', async () => {

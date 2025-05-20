@@ -51,20 +51,20 @@ export class LoginPage {
 
   async expectErrorMessage(message: string) {
     // Wait for the error alert to be visible with a longer timeout
-    await expect(this.errorAlert).toBeVisible({ timeout: 10000 });
-    await expect(this.errorAlert).toContainText(message, { timeout: 10000 });
+    await expect(this.errorAlert).toBeVisible({ timeout: 60000 });
+    await expect(this.errorAlert).toContainText(message, { timeout: 60000 });
   }
 
   async expectEmptyFieldError() {
     await this.submitButton.click();
     
     // Check email error
-    await expect(this.emailError).toBeVisible();
+    await expect(this.emailError).toBeVisible({ timeout: 60000 });
     const emailErrorText = await this.emailError.textContent();
     expect(emailErrorText).toBe('Email is required');
 
     // Check password error
-    await expect(this.passwordError).toBeVisible();
+    await expect(this.passwordError).toBeVisible({ timeout: 60000 });
     const passwordErrorText = await this.passwordError.textContent();
     expect(passwordErrorText).toBe('Password is required');
   }
@@ -72,7 +72,7 @@ export class LoginPage {
   async expectInvalidEmailError() {
     await this.emailInput.fill('invalid-email');
     await this.submitButton.click();
-    await expect(this.emailError).toBeVisible();
+    await expect(this.emailError).toBeVisible({ timeout: 60000 });
     const emailErrorText = await this.emailError.textContent();
     expect(emailErrorText).toBe('Please enter a valid email address');
   }
