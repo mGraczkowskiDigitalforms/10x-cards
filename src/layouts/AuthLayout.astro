@@ -1,0 +1,49 @@
+---
+import Layout from './Layout.astro';
+import { Card } from '@/components/ui/card';
+
+interface Props {
+  title: string;
+  subtitle?: string;
+}
+
+const { title, subtitle } = Astro.props;
+const pageTitle = `${title} - 10X Cards`;
+---
+
+<Layout title={pageTitle}>
+  <main class="container mx-auto flex min-h-screen items-center justify-center p-4">
+    <div class="w-full max-w-md mx-auto">
+      <Card className="w-full p-6">
+        <div class="space-y-2 text-center mb-6">
+          <h1 class="text-2xl font-semibold tracking-tight">
+            {title}
+          </h1>
+          {subtitle && (
+            <p class="text-sm text-muted-foreground">
+              {subtitle}
+            </p>
+          )}
+        </div>
+
+        <slot />
+      </Card>
+
+      <div class="mt-6 text-center text-sm text-muted-foreground">
+        <a 
+          href="https://10xcards.com/terms" 
+          class="hover:text-primary underline underline-offset-4"
+        >
+          Terms of Service
+        </a>
+        {' · '}
+        <a 
+          href="https://10xcards.com/privacy" 
+          class="hover:text-primary underline underline-offset-4"
+        >
+          Privacy Policy
+        </a>
+      </div>
+    </div>
+  </main>
+</Layout> 

@@ -1,5 +1,5 @@
 import { GenerateView } from "@/components/generate/GenerateView";
-import { UserPanel } from "@/components/auth/UserPanel";
+import { UserPanel } from "@/features/auth/components/UserPanel";
 import { useEffect, useState } from "react";
 
 interface DashboardViewProps {

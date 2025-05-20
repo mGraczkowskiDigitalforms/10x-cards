@@ -1,34 +1,48 @@
 ---
+import { ViewTransitions } from 'astro:transitions';
+import { Toaster } from '@/components/ui/sonner';
 import "../styles/global.css";
-import { Toaster } from 'sonner';
 
 interface Props {
   title?: string;
+  description?: string;
 }
 
-const { title = "10x Astro Starter" } = Astro.props;
+const { 
+  title = "10X Cards", 
+  description = "Boost your productivity with 10X Cards" 
+} = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <ViewTransitions />
   </head>
-  <body>
+  <body class="min-h-screen bg-background antialiased">
     <slot />
-    <Toaster richColors closeButton position="top-right" />
+    <Toaster client:load richColors closeButton position="top-right" />
   </body>
 </html>
 
-<style>
-  html,
+<style is:global>
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+  }
+
   body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 </style>

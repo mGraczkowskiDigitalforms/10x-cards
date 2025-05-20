@@ -1,7 +1,6 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import { RegisterForm } from '@/components/auth/RegisterForm';
-import { Toaster } from '@/components/ui/sonner';
+import AuthLayout from '@/layouts/AuthLayout.astro';
+import { RegisterForm } from '@/features/auth/components';
 import { createSupabaseServerInstance } from '@/db/supabase.server';
 
 // Check if user is already logged in
@@ -18,9 +17,9 @@ if (user) {
 }
 ---
 
-<Layout title="Register - 10X Cards">
-  <main class="container mx-auto px-4 py-8">
-    <RegisterForm client:load />
-    <Toaster client:load />
-  </main>
-</Layout> 
+<AuthLayout 
+  title="Create an account" 
+  subtitle="Enter your email below to create your account"
+>
+  <RegisterForm client:load />
+</AuthLayout> 

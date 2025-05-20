@@ -1,7 +1,6 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import { LoginForm } from '@/components/auth/LoginForm';
-import { Toaster } from '@/components/ui/sonner';
+import AuthLayout from '@/layouts/AuthLayout.astro';
+import { LoginForm } from '@/features/auth/components';
 import { createSupabaseServerInstance } from '@/db/supabase.server';
 
 // Check if user is already logged in
@@ -18,9 +17,9 @@ if (user) {
 }
 ---
 
-<Layout title="Login - 10X Cards">
-  <main class="container mx-auto px-4 py-8">
-    <LoginForm client:load />
-    <Toaster client:load />
-  </main>
-</Layout> 
+<AuthLayout 
+  title="Welcome back" 
+  subtitle="Enter your email and password to sign in to your account"
+>
+  <LoginForm client:load />
+</AuthLayout> 

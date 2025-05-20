@@ -1,12 +1,27 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import { ResetPasswordForm } from '@/components/auth/ResetPasswordForm';
+import AuthLayout from '@/layouts/AuthLayout.astro';
+import { ResetPasswordForm } from '@/features/auth/components';
 import { Toaster } from '@/components/ui/sonner';
+
+// Get token from URL
+const token = Astro.url.searchParams.get('token');
+
+// If no token, redirect to forgot password
+if (!token) {
+  return Astro.redirect('/auth/forgot-password');
+}
 ---
 
-<Layout title="Reset Password - 10X Cards">
-  <main class="container mx-auto px-4 py-8">
-    <ResetPasswordForm client:load />
-    <Toaster client:load />
-  </main>
-</Layout> 
+<AuthLayout 
+  title="Create new password" 
+  subtitle="Enter your new password below"
+>
+  <ResetPasswordForm 
+    client:load 
+    onSubmit={async (password) => {
+      // Tu będzie logika resetowania hasła z tokenem z URL
+      console.log('Resetting password:', password);
+    }} 
+  />
+  <Toaster client:load />
+</AuthLayout> 
