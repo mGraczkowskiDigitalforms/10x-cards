@@ -7,15 +7,19 @@ export class LoginPage {
   readonly submitButton: Locator;
   readonly errorAlert: Locator;
   readonly forgotPasswordLink: Locator;
+  readonly emailError: Locator;
+  readonly passwordError: Locator;
 
   constructor(page: Page) {
     this.page = page;
     // Use more specific selectors
     this.emailInput = page.getByRole('textbox', { name: 'Email address' });
-    this.passwordInput = page.getByRole('textbox', { name: 'Password', exact: true }).or(page.getByRole('textbox', { name: /^Password$/ }));
+    this.passwordInput = page.locator('[data-test-id="login-password-input"]');
     this.submitButton = page.getByRole('button', { name: 'Sign in', exact: true });
-    this.errorAlert = page.getByRole('alert');
+    this.errorAlert = page.locator('[data-test-id="login-error-message"]');
     this.forgotPasswordLink = page.getByRole('link', { name: 'Forgot password?', exact: true });
+    this.emailError = page.locator('#email-error');
+    this.passwordError = page.locator('#password-error');
   }
 
   async goto() {
@@ -46,19 +50,31 @@ export class LoginPage {
   }
 
   async expectErrorMessage(message: string) {
-    await expect(this.errorAlert).toContainText(message);
+    // Wait for the error alert to be visible with a longer timeout
+    await expect(this.errorAlert).toBeVisible({ timeout: 10000 });
+    await expect(this.errorAlert).toContainText(message, { timeout: 10000 });
   }
 
   async expectEmptyFieldError() {
     await this.submitButton.click();
-    await expect(this.page.getByText('Email is required')).toBeVisible();
-    await expect(this.page.getByText('Password is required')).toBeVisible();
+    
+    // Check email error
+    await expect(this.emailError).toBeVisible();
+    const emailErrorText = await this.emailError.textContent();
+    expect(emailErrorText).toBe('Email is required');
+
+    // Check password error
+    await expect(this.passwordError).toBeVisible();
+    const passwordErrorText = await this.passwordError.textContent();
+    expect(passwordErrorText).toBe('Password is required');
   }
 
   async expectInvalidEmailError() {
     await this.emailInput.fill('invalid-email');
     await this.submitButton.click();
-    await expect(this.page.getByText('Please enter a valid email address')).toBeVisible();
+    await expect(this.emailError).toBeVisible();
+    const emailErrorText = await this.emailError.textContent();
+    expect(emailErrorText).toBe('Please enter a valid email address');
   }
 
   async goToForgotPassword() {

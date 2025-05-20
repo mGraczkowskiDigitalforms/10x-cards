@@ -28,11 +28,18 @@ export function LoginForm() {
       await login(data);
       window.location.href = '/';
     } catch (err) {
-      setError('root', { 
-        message: err instanceof Error ? err.message : 'An unexpected error occurred' 
-      });
+      console.log('Login error:', err);
+      if (err instanceof Error) {
+        console.log('Setting error message:', err.message);
+        setError('root', { message: err.message });
+      } else {
+        console.log('Setting generic error message');
+        setError('root', { message: 'An unexpected error occurred' });
+      }
     }
   });
+
+  console.log('Form errors:', errors);
 
   return (
     <form 
@@ -45,7 +52,7 @@ export function LoginForm() {
         <ErrorAlert 
           errorMessage={errors.root.message} 
           onDismiss={() => setError('root', { message: '' })} 
-          data-test-id="login-error-alert"
+          data-test-id="login-error-message"
         />
       )}
 

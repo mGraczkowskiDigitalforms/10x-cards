@@ -18,6 +18,9 @@ export class AuthService {
   private static async handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
       const error = await response.json();
+      if (error.error === 'Invalid login credentials') {
+        throw new AuthError({ error: 'Invalid credentials' });
+      }
       throw new AuthError(error);
     }
     return response.json();

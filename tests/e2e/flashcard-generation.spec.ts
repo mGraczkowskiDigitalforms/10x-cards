@@ -124,7 +124,7 @@ test.describe('Flashcard Generation Flow', () => {
     await page.waitForLoadState('networkidle');
     
     // Verify dashboard is loaded with user info
-    await expect(page.locator('.min-h-screen')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[data-test-id="dashboard-view"]')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('[data-test-id="user-email"]')).toBeVisible({ timeout: 10000 });
   });
 

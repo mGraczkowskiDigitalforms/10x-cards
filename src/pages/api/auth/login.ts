@@ -41,6 +41,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
 
     if (error) {
+      // Map Supabase error messages to our custom messages
+      if (error.message === 'Invalid login credentials') {
+        return new Response(
+          JSON.stringify({ error: 'Invalid credentials' }),
+          { status: 400 }
+        );
+      }
       return new Response(
         JSON.stringify({ error: error.message }),
         { status: 400 }

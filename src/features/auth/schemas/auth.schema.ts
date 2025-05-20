@@ -1,10 +1,11 @@
 import { z } from 'zod';
 
 const emailSchema = z.string()
-  .email('Please enter a valid email address')
-  .min(1, 'Email is required');
+  .min(1, 'Email is required')
+  .email('Please enter a valid email address');
 
 const passwordSchema = z.string()
+  .min(1, 'Password is required')
   .min(8, 'Password must be at least 8 characters long')
   .regex(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,

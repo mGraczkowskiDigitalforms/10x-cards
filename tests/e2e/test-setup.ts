@@ -116,6 +116,6 @@ export async function setupTestEnvironment(page: Page) {
 export async function expectPageToBeReady(page: Page) {
   await expect(page).toHaveURL('/generate', { timeout: 10000 });
   await page.waitForLoadState('networkidle');
-  await expect(page.locator('.min-h-screen')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('[data-test-id="dashboard-view"]')).toBeVisible({ timeout: 10000 });
   await expect(page.locator('[data-test-id="user-email"]')).toBeVisible({ timeout: 10000 });
 } 
