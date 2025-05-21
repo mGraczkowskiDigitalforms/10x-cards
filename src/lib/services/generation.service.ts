@@ -307,7 +307,7 @@ Example response format:
     if (error instanceof Error && "response" in error) {
       const errorWithResponse = error as { response?: { text: () => Promise<string> } };
       try {
-        return await errorWithResponse.response?.text?.() || "No response text";
+        return (await errorWithResponse.response?.text?.()) || "No response text";
       } catch {
         return "Failed to get response text";
       }
