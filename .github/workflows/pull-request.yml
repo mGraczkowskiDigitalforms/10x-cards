@@ -1,0 +1,266 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run linting
+        run: npm run lint:check
+        
+  unit-test:
+    name: Unit Tests
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run unit tests with coverage
+        run: npm run test:coverage
+        
+      - name: Upload unit test coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-coverage
+          path: coverage/
+          retention-days: 7
+          
+  e2e-test:
+    name: E2E Tests
+    needs: lint
+    runs-on: ubuntu-latest
+    environment: integration
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      E2E_USERNAME_ID: ${{ secrets.E2E_USERNAME_ID }}
+      E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
+      E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+      NODE_ENV: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+      
+      - name: Run E2E tests with coverage
+        run: npm run test:e2e
+        
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          
+  status-comment:
+    name: PR Status Comment
+    needs: [lint, unit-test, e2e-test]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get PR Details
+        id: pr-details
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            
+            return {
+              title: pr.data.title,
+              number: pr.data.number,
+              head_sha: pr.data.head.sha.substring(0, 7),
+              author: pr.data.user.login
+            }
+
+      - name: Download unit test coverage
+        if: ${{ !cancelled() }}
+        uses: actions/download-artifact@v4
+        with:
+          name: unit-test-coverage
+          path: coverage
+        continue-on-error: true
+          
+      - name: Download E2E test results
+        if: ${{ !cancelled() }}
+        uses: actions/download-artifact@v4
+        with:
+          name: e2e-test-results
+          path: e2e-results
+        continue-on-error: true
+          
+      - name: Create success comment
+        if: ${{ success() }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const prDetails = JSON.parse('${{ steps.pr-details.outputs.result }}');
+            
+            // Try to read unit test coverage summary if exists
+            let unitTestCoverage = 'Unit test coverage information not available';
+            try {
+              const coverageFile = './coverage/coverage-summary.json';
+              if (fs.existsSync(coverageFile)) {
+                const coverageData = JSON.parse(fs.readFileSync(coverageFile, 'utf8'));
+                const total = coverageData.total;
+                unitTestCoverage = `
+                | Coverage Type | Percentage |
+                | ------------- | ---------- |
+                | Lines         | ${total.lines.pct}% |
+                | Statements    | ${total.statements.pct}% |
+                | Functions     | ${total.functions.pct}% |
+                | Branches      | ${total.branches.pct}% |
+                `;
+              }
+            } catch (error) {
+              console.error('Error reading unit test coverage:', error);
+            }
+            
+            // Create comment with all test results
+            const comment = `
+            ## 🚀 PR #${prDetails.number} Validation Completed Successfully
+            
+            **PR**: ${prDetails.title}
+            **Author**: @${prDetails.author}
+            **Commit**: ${prDetails.head_sha}
+            
+            ### Validation Steps
+            ✅ **Lint** - Code quality check passed
+            
+            ### Unit Test Coverage Summary
+            ${unitTestCoverage}
+            
+            ### E2E Tests
+            ✅ All E2E tests have passed
+            
+            [View full unit test coverage report](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})
+            [View E2E test reports](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Create failure comment
+        if: ${{ failure() }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prDetails = JSON.parse('${{ steps.pr-details.outputs.result }}');
+            
+            // Get job status
+            const workflow = await github.rest.actions.getWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId
+            });
+            
+            const jobs = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId
+            });
+            
+            // Create failure summary
+            let failureSummary = '';
+            let lintStatus = '⚠️ Unknown';
+            let unitTestStatus = '⚠️ Unknown';
+            let e2eTestStatus = '⚠️ Unknown';
+            
+            jobs.data.jobs.forEach(job => {
+              if (job.name === 'Lint') {
+                lintStatus = job.conclusion === 'success' ? '✅ Passed' : '❌ Failed';
+              } else if (job.name === 'Unit Tests') {
+                unitTestStatus = job.conclusion === 'success' ? '✅ Passed' : '❌ Failed';
+              } else if (job.name === 'E2E Tests') {
+                e2eTestStatus = job.conclusion === 'success' ? '✅ Passed' : '❌ Failed';
+              }
+              
+              if (job.conclusion === 'failure') {
+                failureSummary += `- ❌ **${job.name}** failed\n`;
+              } else if (job.conclusion === 'success') {
+                failureSummary += `- ✅ **${job.name}** passed\n`;
+              } else {
+                failureSummary += `- ⚠️ **${job.name}** ${job.conclusion}\n`;
+              }
+            });
+            
+            const comment = `
+            ## ❌ PR #${prDetails.number} Validation Failed
+            
+            **PR**: ${prDetails.title}
+            **Author**: @${prDetails.author}
+            **Commit**: ${prDetails.head_sha}
+            
+            ### Validation Steps Status
+            - **Lint**: ${lintStatus}
+            - **Unit Tests**: ${unitTestStatus}
+            - **E2E Tests**: ${e2eTestStatus}
+            
+            ### Detailed Job Summary
+            ${failureSummary}
+            
+            Please check the [workflow run](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}) for more details.
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            }); 
