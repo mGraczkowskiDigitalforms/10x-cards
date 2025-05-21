@@ -1,4 +1,5 @@
 /* eslint-env node */
+// eslint-disable-next-line no-undef
 module.exports = {
   env: {
     node: true, // to mówi ESLint, że kod działa w Node.js i zna 'module', 'require', itp.
