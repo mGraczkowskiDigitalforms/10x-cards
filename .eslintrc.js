@@ -1,0 +1,13 @@
+module.exports = {
+  // ... existing code ...
+  ignorePatterns: [
+    'node_modules',
+    'dist',
+    'build',
+    'coverage',
+    'test-reports',
+    '*.min.js',
+    '*.bundle.js'
+  ],
+  // ... existing code ...
+} 
