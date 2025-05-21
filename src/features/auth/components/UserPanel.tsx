@@ -3,13 +3,10 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
 interface UserPanelProps {
-  user: {
-    email: string;
-    lastLoginAt: string;
-  };
+  // Usuwam nieużywaną właściwość z interfejsu
 }
 
-export function UserPanel({ user }: UserPanelProps) {
+export function UserPanel({}: UserPanelProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogout = async () => {

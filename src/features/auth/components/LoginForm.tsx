@@ -7,9 +7,12 @@ import { AuthInput } from "@/components/ui/AuthInput";
 import { loginSchema } from "../schemas/auth.schema";
 import { useAuthService } from "../hooks/useAuthService";
 import type { LoginCredentials } from "../types";
+import { useEffect, useState } from "react";
 
 export function LoginForm() {
   const { login } = useAuthService();
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
+  
   const {
     register,
     handleSubmit,
@@ -26,7 +29,7 @@ export function LoginForm() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       await login(data);
-      window.location.href = "/generate";
+      setRedirectTo("/generate");
     } catch (err) {
       console.log("Login error:", err);
       if (err instanceof Error) {
@@ -38,6 +41,12 @@ export function LoginForm() {
       }
     }
   });
+
+  useEffect(() => {
+    if (redirectTo) {
+      window.location.href = redirectTo;
+    }
+  }, [redirectTo]);
 
   console.log("Form errors:", errors);
 
@@ -96,7 +105,7 @@ export function LoginForm() {
       </Button>
 
       <div className="text-center text-sm">
-        Don't have an account?{" "}
+        Don&apos;t have an account?{" "}
         <a href="/auth/register" className="font-medium text-primary hover:underline">
           Sign up
         </a>

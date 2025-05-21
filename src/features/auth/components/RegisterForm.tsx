@@ -7,9 +7,12 @@ import { AuthInput } from "@/components/ui/AuthInput";
 import { registerSchema } from "../schemas/auth.schema";
 import { useAuthService } from "../hooks/useAuthService";
 import type { RegisterCredentials } from "../types";
+import { useEffect, useState } from "react";
 
 export function RegisterForm() {
   const { register: registerUser } = useAuthService();
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
+  
   const {
     register,
     handleSubmit,
@@ -27,13 +30,19 @@ export function RegisterForm() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       await registerUser(data);
-      window.location.href = "/";
+      setRedirectTo("/");
     } catch (err) {
       setError("root", {
         message: err instanceof Error ? err.message : "An unexpected error occurred",
       });
     }
   });
+
+  useEffect(() => {
+    if (redirectTo) {
+      window.location.href = redirectTo;
+    }
+  }, [redirectTo]);
 
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>

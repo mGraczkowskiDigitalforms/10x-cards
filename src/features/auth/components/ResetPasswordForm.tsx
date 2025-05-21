@@ -7,6 +7,7 @@ import { AuthInput } from "@/components/ui/AuthInput";
 import { resetPasswordSchema } from "../schemas/auth.schema";
 import { useAuthService } from "../hooks/useAuthService";
 import type { ResetPasswordCredentials } from "../types";
+import { useEffect, useState } from "react";
 
 interface ResetPasswordFormProps {
   token: string;
@@ -14,6 +15,8 @@ interface ResetPasswordFormProps {
 
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const { resetPassword } = useAuthService();
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
+  
   const {
     register,
     handleSubmit,
@@ -30,13 +33,19 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const onSubmit = handleSubmit(async (data) => {
     try {
       await resetPassword({ ...data, token });
-      window.location.href = "/auth/login";
+      setRedirectTo("/auth/login");
     } catch (err) {
       setError("root", {
         message: err instanceof Error ? err.message : "An unexpected error occurred",
       });
     }
   });
+
+  useEffect(() => {
+    if (redirectTo) {
+      window.location.href = redirectTo;
+    }
+  }, [redirectTo]);
 
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
