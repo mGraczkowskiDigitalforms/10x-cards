@@ -1,4 +1,4 @@
-import { type Page, type Locator, expect } from '@playwright/test';
+import { type Page, type Locator, expect } from "@playwright/test";
 
 export class FlashcardProposalPage {
   readonly page: Page;
@@ -27,7 +27,7 @@ export class FlashcardProposalPage {
       frontInput: this.page.locator(`[data-test-id="${testId}-edit-front"]`),
       backInput: this.page.locator(`[data-test-id="${testId}-edit-back"]`),
       saveButton: this.page.locator(`[data-test-id="${testId}-save-edit"]`),
-      cancelButton: this.page.locator(`[data-test-id="${testId}-cancel-edit"]`)
+      cancelButton: this.page.locator(`[data-test-id="${testId}-cancel-edit"]`),
     };
   }
 
@@ -55,22 +55,22 @@ export class FlashcardProposalPage {
     await expect(locators.backText).toContainText(back);
   }
 
-  async expectFlashcardState(index: number, state: 'accepted' | 'rejected' | 'editable') {
+  async expectFlashcardState(index: number, state: "accepted" | "rejected" | "editable") {
     const locators = this.getFlashcardLocators(index);
     const item = this.getFlashcardItem(index);
-    
+
     switch (state) {
-      case 'accepted':
+      case "accepted":
         await expect(locators.acceptButton).toBeDisabled();
         await expect(locators.editButton).not.toBeVisible();
         await expect(item).toHaveClass(/border-green-500/);
         break;
-      case 'rejected':
+      case "rejected":
         await expect(locators.rejectButton).toBeDisabled();
         await expect(locators.editButton).not.toBeVisible();
         await expect(item).toHaveClass(/border-red-500/);
         break;
-      case 'editable':
+      case "editable":
         await expect(locators.acceptButton).toBeEnabled();
         await expect(locators.rejectButton).toBeEnabled();
         await expect(locators.editButton).toBeVisible();
@@ -80,7 +80,7 @@ export class FlashcardProposalPage {
 
   async expectEditMode(index: number, isEditing: boolean) {
     const item = this.getFlashcardItem(index);
-    await expect(item).toHaveAttribute('data-edit-mode', isEditing.toString());
+    await expect(item).toHaveAttribute("data-edit-mode", isEditing.toString());
   }
 
   async startEditingAndVerifyConcurrentState(index: number) {
@@ -92,4 +92,4 @@ export class FlashcardProposalPage {
     await expect(locators.cancelButton).toBeVisible();
     await this.expectEditMode(index, true);
   }
-} 
+}

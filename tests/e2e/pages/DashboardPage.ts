@@ -1,4 +1,4 @@
-import { type Page, type Locator, expect } from '@playwright/test';
+import { type Page, type Locator, expect } from "@playwright/test";
 
 export class DashboardPage {
   readonly page: Page;
@@ -37,9 +37,7 @@ export class DashboardPage {
 
   async generateFlashcards() {
     // Create a promise for the response before clicking
-    const responsePromise = this.page.waitForResponse(response => 
-      response.url().includes('/api/generations')
-    );
+    const responsePromise = this.page.waitForResponse((response) => response.url().includes("/api/generations"));
 
     // Click the button
     await this.generateButton.click();
@@ -60,4 +58,4 @@ export class DashboardPage {
     const match = stats?.match(/(\d+) of (\d+)/);
     return match ? { accepted: parseInt(match[1]), total: parseInt(match[2]) } : { accepted: 0, total: 0 };
   }
-} 
+}
