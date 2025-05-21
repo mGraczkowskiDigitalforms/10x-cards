@@ -36,17 +36,21 @@ export function FlashcardProposalItem({
   const { validateAndNotify, MAX_FRONT_LENGTH, MAX_BACK_LENGTH } = useFlashcardValidation();
 
   const handleSaveEdit = useCallback(async () => {
+    // eslint-disable-next-line no-console
     console.log("Attempting to save edit...");
     if (validateAndNotify(editedFront, editedBack)) {
+      // eslint-disable-next-line no-console
       console.log("Saving edit...");
       onEdit(editedFront, editedBack);
       setIsEditing(false);
     } else {
+      // eslint-disable-next-line no-console
       console.log("Save validation failed, staying in edit mode");
     }
   }, [editedFront, editedBack, onEdit, validateAndNotify]);
 
   const handleCancelEdit = useCallback(() => {
+    // eslint-disable-next-line no-console
     console.log("Canceling edit...");
     setEditedFront(front);
     setEditedBack(back);
@@ -54,6 +58,7 @@ export function FlashcardProposalItem({
   }, [front, back]);
 
   const handleStartEdit = useCallback(() => {
+    // eslint-disable-next-line no-console
     console.log("Starting edit...");
     setEditedFront(front);
     setEditedBack(back);
@@ -61,6 +66,7 @@ export function FlashcardProposalItem({
   }, [front, back]);
 
   useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log("Edit mode changed:", isEditing);
   }, [isEditing]);
 
@@ -137,14 +143,16 @@ export function FlashcardProposalItem({
           <>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <label htmlFor={`front-display-${testId}`} className="text-sm font-medium">Front</label>
+                <label htmlFor={`front-display-${testId}`} className="text-sm font-medium">
+                  Front
+                </label>
                 <span className="text-sm text-gray-500">
                   {front.length}/{MAX_FRONT_LENGTH}
                 </span>
               </div>
-              <p 
+              <p
                 id={`front-display-${testId}`}
-                className="p-2 bg-gray-50 rounded-md min-h-[2.5rem]" 
+                className="p-2 bg-gray-50 rounded-md min-h-[2.5rem]"
                 data-test-id={`${testId}-front`}
               >
                 {front}
@@ -152,14 +160,16 @@ export function FlashcardProposalItem({
             </div>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <label htmlFor={`back-display-${testId}`} className="text-sm font-medium">Back</label>
+                <label htmlFor={`back-display-${testId}`} className="text-sm font-medium">
+                  Back
+                </label>
                 <span className="text-sm text-gray-500">
                   {back.length}/{MAX_BACK_LENGTH}
                 </span>
               </div>
-              <p 
+              <p
                 id={`back-display-${testId}`}
-                className="p-2 bg-gray-50 rounded-md min-h-[2.5rem]" 
+                className="p-2 bg-gray-50 rounded-md min-h-[2.5rem]"
                 data-test-id={`${testId}-back`}
               >
                 {back}
