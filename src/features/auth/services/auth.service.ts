@@ -14,57 +14,60 @@ class AuthError extends Error {
   }
 }
 
-export class AuthService {
-  private static async handleResponse<T>(response: Response): Promise<T> {
-    if (!response.ok) {
-      const error = await response.json();
-      if (error.error === "Invalid login credentials") {
-        throw new AuthError({ error: "Invalid credentials" });
-      }
-      throw new AuthError(error);
+// Helper function to handle API responses
+async function handleAuthResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    const error = await response.json();
+    if (error.error === "Invalid login credentials") {
+      throw new AuthError({ error: "Invalid credentials" });
     }
-    return response.json();
+    throw new AuthError(error);
   }
+  return response.json();
+}
 
-  static async login(credentials: LoginCredentials): Promise<User> {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(credentials),
-    });
+export async function login(credentials: LoginCredentials): Promise<User> {
+  const response = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(credentials),
+  });
 
-    return this.handleResponse<User>(response);
-  }
+  return handleAuthResponse<User>(response);
+}
 
-  static async register(credentials: RegisterCredentials): Promise<User> {
-    const { confirmPassword, ...registerData } = credentials;
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(registerData),
-    });
+export async function register(credentials: RegisterCredentials): Promise<User> {
+  // Destructure and remove confirmPassword, since it's only used for validation
+  const { confirmPassword: _, ...registerData } = credentials;
+  const response = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(registerData),
+  });
 
-    return this.handleResponse<User>(response);
-  }
+  return handleAuthResponse<User>(response);
+}
 
-  static async resetPassword(credentials: ResetPasswordCredentials): Promise<void> {
-    const { confirmPassword, ...resetData } = credentials;
-    const response = await fetch("/api/auth/reset-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(resetData),
-    });
+export async function resetPassword(credentials: ResetPasswordCredentials): Promise<boolean> {
+  // Destructure and remove confirmPassword, since it's only used for validation
+  const { confirmPassword: _, ...resetData } = credentials;
+  const response = await fetch("/api/auth/reset-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(resetData),
+  });
 
-    return this.handleResponse<void>(response);
-  }
+  await handleAuthResponse<Record<string, unknown>>(response);
+  return true;
+}
 
-  static async forgotPassword(credentials: ForgotPasswordCredentials): Promise<void> {
-    const response = await fetch("/api/auth/forgot-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(credentials),
-    });
+export async function forgotPassword(credentials: ForgotPasswordCredentials): Promise<boolean> {
+  const response = await fetch("/api/auth/forgot-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(credentials),
+  });
 
-    return this.handleResponse<void>(response);
-  }
+  await handleAuthResponse<Record<string, unknown>>(response);
+  return true;
 }

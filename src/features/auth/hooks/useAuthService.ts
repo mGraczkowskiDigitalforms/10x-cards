@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { toast } from "sonner";
-import { AuthService } from "../services/auth.service";
+import { login as apiLogin, register as apiRegister, resetPassword as apiResetPassword, forgotPassword as apiForgotPassword } from "../services/auth.service";
 import type {
   LoginCredentials,
   RegisterCredentials,
@@ -12,7 +12,7 @@ import type {
 export const useAuthService = () => {
   const login = useCallback(async (credentials: LoginCredentials): Promise<User> => {
     try {
-      const user = await AuthService.login(credentials);
+      const user = await apiLogin(credentials);
       toast.success("Successfully logged in");
       return user;
     } catch (error) {
@@ -23,7 +23,7 @@ export const useAuthService = () => {
 
   const register = useCallback(async (credentials: RegisterCredentials): Promise<User> => {
     try {
-      const user = await AuthService.register(credentials);
+      const user = await apiRegister(credentials);
       toast.success("Account created successfully");
       return user;
     } catch (error) {
@@ -34,7 +34,7 @@ export const useAuthService = () => {
 
   const resetPassword = useCallback(async (credentials: ResetPasswordCredentials): Promise<void> => {
     try {
-      await AuthService.resetPassword(credentials);
+      await apiResetPassword(credentials);
       toast.success("Password has been changed");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "An error occurred while resetting password");
@@ -44,7 +44,7 @@ export const useAuthService = () => {
 
   const forgotPassword = useCallback(async (credentials: ForgotPasswordCredentials): Promise<void> => {
     try {
-      await AuthService.forgotPassword(credentials);
+      await apiForgotPassword(credentials);
       toast.success("Password reset link has been sent to your email");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "An error occurred while sending reset link");
