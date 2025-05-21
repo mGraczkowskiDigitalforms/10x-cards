@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import type { CreateFlashcardsCommand, FlashcardCreateDto } from "../../types";
 import { FlashcardService, FlashcardServiceError } from "../../lib/services/flashcard.service";
 
 // Validation schema for individual flashcard
