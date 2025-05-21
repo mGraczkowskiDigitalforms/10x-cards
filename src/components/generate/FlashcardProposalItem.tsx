@@ -96,10 +96,11 @@ export function FlashcardProposalItem({
         {isEditing ? (
           <>
             <div className="space-y-2">
-              <label className="text-sm font-medium">
+              <label htmlFor={`front-textarea-${testId}`} className="text-sm font-medium">
                 Front ({editedFront.length}/{MAX_FRONT_LENGTH})
               </label>
               <Textarea
+                id={`front-textarea-${testId}`}
                 value={editedFront}
                 onChange={handleFrontChange}
                 maxLength={MAX_FRONT_LENGTH}
@@ -109,10 +110,11 @@ export function FlashcardProposalItem({
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">
+              <label htmlFor={`back-textarea-${testId}`} className="text-sm font-medium">
                 Back ({editedBack.length}/{MAX_BACK_LENGTH})
               </label>
               <Textarea
+                id={`back-textarea-${testId}`}
                 value={editedBack}
                 onChange={handleBackChange}
                 maxLength={MAX_BACK_LENGTH}
@@ -135,23 +137,31 @@ export function FlashcardProposalItem({
           <>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <label className="text-sm font-medium">Front</label>
+                <label htmlFor={`front-display-${testId}`} className="text-sm font-medium">Front</label>
                 <span className="text-sm text-gray-500">
                   {front.length}/{MAX_FRONT_LENGTH}
                 </span>
               </div>
-              <p className="p-2 bg-gray-50 rounded-md min-h-[2.5rem]" data-test-id={`${testId}-front`}>
+              <p 
+                id={`front-display-${testId}`}
+                className="p-2 bg-gray-50 rounded-md min-h-[2.5rem]" 
+                data-test-id={`${testId}-front`}
+              >
                 {front}
               </p>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <label className="text-sm font-medium">Back</label>
+                <label htmlFor={`back-display-${testId}`} className="text-sm font-medium">Back</label>
                 <span className="text-sm text-gray-500">
                   {back.length}/{MAX_BACK_LENGTH}
                 </span>
               </div>
-              <p className="p-2 bg-gray-50 rounded-md min-h-[2.5rem]" data-test-id={`${testId}-back`}>
+              <p 
+                id={`back-display-${testId}`}
+                className="p-2 bg-gray-50 rounded-md min-h-[2.5rem]" 
+                data-test-id={`${testId}-back`}
+              >
                 {back}
               </p>
             </div>
