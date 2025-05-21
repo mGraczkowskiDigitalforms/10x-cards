@@ -40,7 +40,7 @@ export function DashboardView({ user }: DashboardViewProps) {
 
             {/* Logout button */}
             <div className="flex items-center w-full sm:w-auto" data-test-id="user-panel-container">
-              <UserPanel user={user} />
+              <UserPanel />
             </div>
           </div>
         </div>
