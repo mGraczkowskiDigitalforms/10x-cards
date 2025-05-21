@@ -143,8 +143,11 @@ Example response format:
               }
             : error,
         responseError:
-          error instanceof Error && "response" in error 
-            ? await ((error as { response?: { text: () => Promise<string> } }).response?.text?.() || Promise.resolve("No response text"))
+          error instanceof Error && "response" in error
+            ? await (
+                (error as { response?: { text: () => Promise<string> } }).response?.text?.() || 
+                Promise.resolve("No response text")
+              )
             : undefined,
       });
 
