@@ -15,38 +15,33 @@ export function UserPanel({ user }: UserPanelProps) {
   const handleLogout = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
       });
 
       if (!response.ok) {
-        throw new Error('Failed to logout');
+        throw new Error("Failed to logout");
       }
 
       // Redirect to home page
-      window.location.href = '/';
+      window.location.href = "/";
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Button 
-      variant="outline" 
-      size="sm"
-      onClick={handleLogout}
-      disabled={isLoading}
-    >
+    <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoading}>
       {isLoading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Logging out...
         </>
       ) : (
-        'Logout'
+        "Logout"
       )}
     </Button>
   );
-} 
+}
