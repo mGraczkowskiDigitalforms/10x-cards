@@ -2,11 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
-interface UserPanelProps {
-  // Usuwam nieużywaną właściwość z interfejsu
-}
-
-export function UserPanel({}: UserPanelProps) {
+export function UserPanel() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogout = async () => {
