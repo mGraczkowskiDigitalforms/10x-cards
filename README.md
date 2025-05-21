@@ -1,4 +1,4 @@
-# 10x-cards
+# 10x-cards by Mariusz Graczkowski
 
 ## Table of Contents
 
