@@ -1,6 +1,11 @@
 import { useCallback } from "react";
 import { toast } from "sonner";
-import { login as apiLogin, register as apiRegister, resetPassword as apiResetPassword, forgotPassword as apiForgotPassword } from "../services/auth.service";
+import {
+  login as apiLogin,
+  register as apiRegister,
+  resetPassword as apiResetPassword,
+  forgotPassword as apiForgotPassword,
+} from "../services/auth.service";
 import type {
   LoginCredentials,
   RegisterCredentials,

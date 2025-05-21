@@ -16,7 +16,7 @@ interface ResetPasswordFormProps {
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const { resetPassword } = useAuthService();
   const [redirectTo, setRedirectTo] = useState<string | null>(null);
-  
+
   const {
     register,
     handleSubmit,

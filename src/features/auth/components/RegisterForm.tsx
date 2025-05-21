@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 export function RegisterForm() {
   const { register: registerUser } = useAuthService();
   const [redirectTo, setRedirectTo] = useState<string | null>(null);
-  
+
   const {
     register,
     handleSubmit,
