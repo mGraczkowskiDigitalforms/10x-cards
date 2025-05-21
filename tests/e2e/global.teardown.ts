@@ -7,11 +7,12 @@ teardown("cleanup database", async () => {
     throw new Error("E2E_USERNAME_ID environment variable is required for database cleanup");
   }
 
+  // eslint-disable-next-line no-console
   console.log("Cleaning up test database...");
 
   const supabase = createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_KEY!, // This should be the anon/public key
+    process.env.SUPABASE_URL ?? "",
+    process.env.SUPABASE_KEY ?? "", // This should be the anon/public key
     {
       auth: {
         persistSession: false,
@@ -20,6 +21,7 @@ teardown("cleanup database", async () => {
   );
 
   const testUserId = process.env.E2E_USERNAME_ID;
+  // eslint-disable-next-line no-console
   console.log(`Cleaning up data for test user: ${testUserId}`);
 
   try {
@@ -36,8 +38,10 @@ teardown("cleanup database", async () => {
 
     if (errorLogsError) throw errorLogsError;
 
+    // eslint-disable-next-line no-console
     console.log("Database cleanup completed successfully");
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error("Error during database cleanup:", error);
     throw error;
   }
