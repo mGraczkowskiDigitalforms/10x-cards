@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 const result = dotenv.config({ path: ".env.test" });
 
 if (result.error) {
+  // eslint-disable-next-line no-console
   console.error("Error loading .env.test file:", result.error);
   process.exit(1);
 }
@@ -23,11 +24,13 @@ const requiredEnvVars = [
 
 const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
 if (missingVars.length > 0) {
+  // eslint-disable-next-line no-console
   console.error("Missing required environment variables:", missingVars);
   process.exit(1);
 }
 
 // Log all environment variables for debugging
+// eslint-disable-next-line no-console
 console.log("All loaded environment variables:", {
   SUPABASE_URL: process.env.SUPABASE_URL,
   SUPABASE_KEY: process.env.SUPABASE_KEY,
