@@ -52,17 +52,17 @@ interface TestFixtures {
 
 export { expect };
 export const test = base.extend<TestFixtures>({
-  loginPage: async ({ page }, use) => {
+  loginPage: async ({ page }, utilizePage) => {
     const loginPage = new LoginPage(page);
-    await use(loginPage);
+    await utilizePage(loginPage);
   },
-  dashboardPage: async ({ page }, use) => {
+  dashboardPage: async ({ page }, utilizePage) => {
     const dashboardPage = new DashboardPage(page);
-    await use(dashboardPage);
+    await utilizePage(dashboardPage);
   },
-  flashcardProposalPage: async ({ page }, use) => {
+  flashcardProposalPage: async ({ page }, utilizePage) => {
     const flashcardProposalPage = new FlashcardProposalPage(page);
-    await use(flashcardProposalPage);
+    await utilizePage(flashcardProposalPage);
   },
 });
 
