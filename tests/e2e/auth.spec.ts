@@ -41,7 +41,7 @@ test.describe("Authentication Flow", () => {
         try {
           const body = await response.json();
           console.log("Response body:", body);
-        } catch (_error) {
+        } catch {
           console.log("Failed to parse response body");
         }
       }

@@ -38,7 +38,7 @@ export async function login(credentials: LoginCredentials): Promise<User> {
 
 export async function register(credentials: RegisterCredentials): Promise<User> {
   // Destructure and remove confirmPassword, since it's only used for validation
-  const { confirmPassword: _unused, ...registerData } = credentials;
+  const { confirmPassword: _, ...registerData } = credentials;
   const response = await fetch("/api/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -50,7 +50,7 @@ export async function register(credentials: RegisterCredentials): Promise<User> 
 
 export async function resetPassword(credentials: ResetPasswordCredentials): Promise<boolean> {
   // Destructure and remove confirmPassword, since it's only used for validation
-  const { confirmPassword: _unused2, ...resetData } = credentials;
+  const { confirmPassword: _, ...resetData } = credentials;
   const response = await fetch("/api/auth/reset-password", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
