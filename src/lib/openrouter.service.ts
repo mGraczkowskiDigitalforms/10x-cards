@@ -25,7 +25,7 @@ export class OpenRouterService {
   private modelParameters: ModelParameters;
   private systemMessage?: string;
   private userMessage?: string;
-  private responseFormat?: Record<string, any>;
+  private responseFormat?: Record<string, unknown>;
   private readonly retryConfig: Required<RetryConfig>;
   private readonly logger: Logger;
 
@@ -157,7 +157,7 @@ export class OpenRouterService {
     }
   }
 
-  public setResponseFormat(schema: Record<string, any>): void {
+  public setResponseFormat(schema: Record<string, unknown>): void {
     try {
       // Validate input
       const validatedSchema = responseFormatSchema.parse(schema);
@@ -207,6 +207,7 @@ export class OpenRouterService {
 
     // Add response format if present
     if (this.responseFormat) {
+      // eslint-disable-next-line no-console
       console.log("Setting response format:", this.responseFormat);
       payload.response_format = {
         type: "json_schema",
@@ -276,6 +277,7 @@ export class OpenRouterService {
 
   private async _sendRequest(payload: OpenRouterPayload): Promise<Response> {
     try {
+      // eslint-disable-next-line no-console
       console.log("OpenRouter request details:", {
         url: this.apiUrl,
         model: payload.model,
@@ -298,9 +300,11 @@ export class OpenRouterService {
       });
 
       const responseText = await response.text();
+      // eslint-disable-next-line no-console
       console.log("OpenRouter raw response text:", responseText);
 
       if (!response.ok) {
+        // eslint-disable-next-line no-console
         console.error("OpenRouter API error response:", {
           status: response.status,
           statusText: response.statusText,
@@ -341,11 +345,13 @@ export class OpenRouterService {
   private async _validateResponse(response: Response): Promise<OpenRouterResponse> {
     try {
       const data = await response.json();
+      // eslint-disable-next-line no-console
       console.log("Raw API response:", JSON.stringify(data, null, 2));
 
       try {
         return responseSchema.parse(data);
       } catch (validationError) {
+        // eslint-disable-next-line no-console
         console.error("Response validation error:", validationError);
         throw new OpenRouterError(
           `Invalid response format: ${validationError instanceof Error ? validationError.message : "Unknown validation error"}`,
@@ -379,18 +385,6 @@ export class OpenRouterService {
   }
 
   private _handleError(error: unknown): void {
-    // Log error details without sensitive information
-    const errorDetails =
-      error instanceof OpenRouterError
-        ? {
-            code: error.code,
-            status: error.status,
-            message: error.message,
-          }
-        : {
-            message: String(error),
-          };
-
     // Log error with appropriate context
     if (error instanceof OpenRouterError) {
       this.logger.error(error.message, error, {
