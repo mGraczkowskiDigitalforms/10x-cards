@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Loader2, Save, CheckCircle } from 'lucide-react';
-import { toast } from 'sonner';
-import type { FlashcardProposalViewModel } from './GenerateView';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Loader2, Save, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
+import type { FlashcardProposalViewModel } from "./GenerateView";
 
 interface BulkSaveButtonProps {
   flashcards: FlashcardProposalViewModel[];
@@ -12,16 +12,10 @@ interface BulkSaveButtonProps {
   onSuccess?: () => void;
 }
 
-export function BulkSaveButton({ 
-  flashcards, 
-  generationId,
-  userId,
-  disabled = false,
-  onSuccess 
-}: BulkSaveButtonProps) {
+export function BulkSaveButton({ flashcards, generationId, userId, disabled = false, onSuccess }: BulkSaveButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const acceptedFlashcards = flashcards.filter(card => card.accepted);
+  const acceptedFlashcards = flashcards.filter((card) => card.accepted);
   const acceptedCount = acceptedFlashcards.length;
   const totalCount = flashcards.length;
 
@@ -30,51 +24,48 @@ export function BulkSaveButton({
 
     const cardsToSave = saveAcceptedOnly ? acceptedFlashcards : flashcards;
     if (cardsToSave.length === 0) {
-      toast.error(saveAcceptedOnly ? 'No accepted flashcards to save' : 'No flashcards to save');
+      toast.error(saveAcceptedOnly ? "No accepted flashcards to save" : "No flashcards to save");
       return;
     }
 
     const toastId = toast.loading(
-      saveAcceptedOnly 
-        ? `Saving ${acceptedCount} accepted flashcard${acceptedCount === 1 ? '' : 's'}...`
-        : `Saving all ${totalCount} flashcard${totalCount === 1 ? '' : 's'}...`
+      saveAcceptedOnly
+        ? `Saving ${acceptedCount} accepted flashcard${acceptedCount === 1 ? "" : "s"}...`
+        : `Saving all ${totalCount} flashcard${totalCount === 1 ? "" : "s"}...`
     );
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/flashcards', {
-        method: 'POST',
+      const response = await fetch("/api/flashcards", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          flashcards: cardsToSave.map(card => ({
+          flashcards: cardsToSave.map((card) => ({
             front: card.front,
             back: card.back,
-            source: card.edited ? 'ai-edited' : 'ai-full',
+            source: card.edited ? "ai-edited" : "ai-full",
             generation_id: generationId,
-            user_id: userId
-          }))
+            user_id: userId,
+          })),
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save flashcards');
+        throw new Error(errorData.message || "Failed to save flashcards");
       }
 
       toast.success(
-        saveAcceptedOnly 
-          ? `Successfully saved ${acceptedCount} accepted flashcard${acceptedCount === 1 ? '' : 's'}`
-          : `Successfully saved all ${totalCount} flashcard${totalCount === 1 ? '' : 's'}`,
+        saveAcceptedOnly
+          ? `Successfully saved ${acceptedCount} accepted flashcard${acceptedCount === 1 ? "" : "s"}`
+          : `Successfully saved all ${totalCount} flashcard${totalCount === 1 ? "" : "s"}`,
         { id: toastId }
       );
       onSuccess?.();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to save flashcards', 
-        { id: toastId }
-      );
+      toast.error(error instanceof Error ? error.message : "Failed to save flashcards", { id: toastId });
     } finally {
       setIsLoading(false);
     }
@@ -123,4 +114,4 @@ export function BulkSaveButton({
       </Button>
     </div>
   );
-} 
+}

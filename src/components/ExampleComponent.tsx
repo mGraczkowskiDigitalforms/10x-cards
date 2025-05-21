@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 interface ExampleComponentProps {
   initialCount?: number;
   onCountChange?: (count: number) => void;
 }
 
-export const ExampleComponent: React.FC<ExampleComponentProps> = ({
-  initialCount = 0,
-  onCountChange,
-}) => {
+export const ExampleComponent: React.FC<ExampleComponentProps> = ({ initialCount = 0, onCountChange }) => {
   const [count, setCount] = useState(initialCount);
 
   const handleIncrement = () => {
@@ -47,4 +44,4 @@ export const ExampleComponent: React.FC<ExampleComponentProps> = ({
       </div>
     </div>
   );
-}; 
+};

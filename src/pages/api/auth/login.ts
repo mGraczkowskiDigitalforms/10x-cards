@@ -1,5 +1,5 @@
-import type { APIRoute } from 'astro';
-import { createSupabaseServerInstance } from '../../../db/supabase.server';
+import type { APIRoute } from "astro";
+import { createSupabaseServerInstance } from "../../../db/supabase.server";
 
 export const prerender = false;
 
@@ -10,27 +10,18 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     try {
       body = await request.json();
     } catch {
-      return new Response(
-        JSON.stringify({ error: 'Request body is required' }),
-        { status: 400 }
-      );
+      return new Response(JSON.stringify({ error: "Request body is required" }), { status: 400 });
     }
 
     const { email, password } = body;
 
     // Validate required fields
     if (!email) {
-      return new Response(
-        JSON.stringify({ error: 'Email is required' }),
-        { status: 400 }
-      );
+      return new Response(JSON.stringify({ error: "Email is required" }), { status: 400 });
     }
 
     if (!password) {
-      return new Response(
-        JSON.stringify({ error: 'Password is required' }),
-        { status: 400 }
-      );
+      return new Response(JSON.stringify({ error: "Password is required" }), { status: 400 });
     }
 
     const supabase = createSupabaseServerInstance({ cookies, headers: request.headers });
@@ -42,32 +33,23 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     if (error) {
       // Map Supabase error messages to our custom messages
-      if (error.message === 'Invalid login credentials') {
-        return new Response(
-          JSON.stringify({ error: 'Invalid credentials' }),
-          { status: 400 }
-        );
+      if (error.message === "Invalid login credentials") {
+        return new Response(JSON.stringify({ error: "Invalid credentials" }), { status: 400 });
       }
-      return new Response(
-        JSON.stringify({ error: error.message }),
-        { status: 400 }
-      );
+      return new Response(JSON.stringify({ error: error.message }), { status: 400 });
     }
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         user: {
           id: data.user.id,
-          email: data.user.email
-        }
+          email: data.user.email,
+        },
       }),
       { status: 200 }
     );
   } catch (error) {
-    console.error('Login error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500 }
-    );
+    console.error("Login error:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500 });
   }
-}; 
+};

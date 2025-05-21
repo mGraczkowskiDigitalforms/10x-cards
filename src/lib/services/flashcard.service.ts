@@ -1,6 +1,6 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../../db/database.types';
-import type { FlashcardCreateDto, FlashcardDto } from '../../types';
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "../../db/database.types";
+import type { FlashcardCreateDto, FlashcardDto } from "../../types";
 
 export class FlashcardServiceError extends Error {
   constructor(
@@ -9,7 +9,7 @@ export class FlashcardServiceError extends Error {
     public readonly details?: unknown
   ) {
     super(message);
-    this.name = 'FlashcardServiceError';
+    this.name = "FlashcardServiceError";
   }
 }
 
@@ -23,90 +23,70 @@ export class FlashcardService {
    * @returns Array of created flashcards
    * @throws {FlashcardServiceError} When flashcard creation fails
    */
-  async createFlashcards(
-    flashcards: FlashcardCreateDto[],
-    userId: string
-  ): Promise<FlashcardDto[]> {
+  async createFlashcards(flashcards: FlashcardCreateDto[], userId: string): Promise<FlashcardDto[]> {
     try {
       // Check for duplicates within the batch
       const duplicates = this.findDuplicatesInBatch(flashcards);
       if (duplicates.length > 0) {
-        throw new FlashcardServiceError(
-          'Duplicate flashcards found in the request',
-          'DUPLICATE_FLASHCARDS',
-          { duplicates }
-        );
+        throw new FlashcardServiceError("Duplicate flashcards found in the request", "DUPLICATE_FLASHCARDS", {
+          duplicates,
+        });
       }
 
       // Check for existing flashcards
       const existingFlashcards = await this.findExistingFlashcards(flashcards, userId);
       if (existingFlashcards.length > 0) {
-        throw new FlashcardServiceError(
-          'Some flashcards already exist for this user',
-          'EXISTING_FLASHCARDS',
-          { existing: existingFlashcards }
-        );
+        throw new FlashcardServiceError("Some flashcards already exist for this user", "EXISTING_FLASHCARDS", {
+          existing: existingFlashcards,
+        });
       }
 
       // Validate generation_ids if present
-      const generationIds = flashcards
-        .filter(f => f.generation_id !== null)
-        .map(f => f.generation_id!);
+      const generationIds = flashcards.filter((f) => f.generation_id !== null).map((f) => f.generation_id!);
 
       if (generationIds.length > 0) {
         const invalidGenerationIds = await this.findInvalidGenerationIds(generationIds, userId);
         if (invalidGenerationIds.length > 0) {
           throw new FlashcardServiceError(
-            'Some generation IDs are invalid or do not belong to the user',
-            'INVALID_GENERATION_IDS',
+            "Some generation IDs are invalid or do not belong to the user",
+            "INVALID_GENERATION_IDS",
             { invalidGenerationIds }
           );
         }
       }
 
       const { data, error } = await this.supabaseClient
-        .from('flashcards')
+        .from("flashcards")
         .insert(
-          flashcards.map(flashcard => ({
+          flashcards.map((flashcard) => ({
             ...flashcard,
-            user_id: userId
+            user_id: userId,
           }))
         )
         .select();
 
       if (error) {
-        throw new FlashcardServiceError(
-          'Database error while creating flashcards',
-          'DATABASE_ERROR',
-          error
-        );
+        throw new FlashcardServiceError("Database error while creating flashcards", "DATABASE_ERROR", error);
       }
 
       if (!data || data.length === 0) {
-        throw new FlashcardServiceError(
-          'No flashcards were created',
-          'NO_FLASHCARDS_CREATED'
-        );
+        throw new FlashcardServiceError("No flashcards were created", "NO_FLASHCARDS_CREATED");
       }
 
-      return data.map(flashcard => ({
+      return data.map((flashcard) => ({
         id: flashcard.id,
         front: flashcard.front,
         back: flashcard.back,
         source: flashcard.source,
         generation_id: flashcard.generation_id,
         created_at: flashcard.created_at,
-        updated_at: flashcard.updated_at
+        updated_at: flashcard.updated_at,
       }));
     } catch (error) {
       if (error instanceof FlashcardServiceError) {
         throw error;
       }
-      throw new FlashcardServiceError(
-        'Unexpected error while creating flashcards',
-        'UNEXPECTED_ERROR',
-        error
-      );
+      throw new FlashcardServiceError("Unexpected error while creating flashcards", "UNEXPECTED_ERROR", error);
     }
   }
 
@@ -119,7 +99,7 @@ export class FlashcardService {
     const seen = new Set<string>();
     const duplicates: FlashcardCreateDto[] = [];
 
-    flashcards.forEach(flashcard => {
+    flashcards.forEach((flashcard) => {
       const key = `${flashcard.front}:${flashcard.back}`.toLowerCase();
       if (seen.has(key)) {
         duplicates.push(flashcard);
@@ -137,25 +117,18 @@ export class FlashcardService {
    * @param userId User ID to check against
    * @returns Array of existing flashcards
    */
-  private async findExistingFlashcards(
-    flashcards: FlashcardCreateDto[],
-    userId: string
-  ): Promise<FlashcardDto[]> {
-    const frontValues = flashcards.map(f => f.front.toLowerCase());
-    const backValues = flashcards.map(f => f.back.toLowerCase());
+  private async findExistingFlashcards(flashcards: FlashcardCreateDto[], userId: string): Promise<FlashcardDto[]> {
+    const frontValues = flashcards.map((f) => f.front.toLowerCase());
+    const backValues = flashcards.map((f) => f.back.toLowerCase());
 
     const { data, error } = await this.supabaseClient
-      .from('flashcards')
+      .from("flashcards")
       .select()
-      .eq('user_id', userId)
+      .eq("user_id", userId)
       .or(`front.in.(${frontValues}),back.in.(${backValues})`);
 
     if (error) {
-      throw new FlashcardServiceError(
-        'Error checking for existing flashcards',
-        'DATABASE_ERROR',
-        error
-      );
+      throw new FlashcardServiceError("Error checking for existing flashcards", "DATABASE_ERROR", error);
     }
 
     return data || [];
@@ -167,25 +140,18 @@ export class FlashcardService {
    * @param userId User ID to check against
    * @returns Array of invalid generation IDs
    */
-  private async findInvalidGenerationIds(
-    generationIds: number[],
-    userId: string
-  ): Promise<number[]> {
+  private async findInvalidGenerationIds(generationIds: number[], userId: string): Promise<number[]> {
     const { data, error } = await this.supabaseClient
-      .from('generations')
-      .select('id')
-      .eq('user_id', userId)
-      .in('id', generationIds);
+      .from("generations")
+      .select("id")
+      .eq("user_id", userId)
+      .in("id", generationIds);
 
     if (error) {
-      throw new FlashcardServiceError(
-        'Error validating generation IDs',
-        'DATABASE_ERROR',
-        error
-      );
+      throw new FlashcardServiceError("Error validating generation IDs", "DATABASE_ERROR", error);
     }
 
-    const foundIds = new Set(data?.map(g => g.id) || []);
-    return generationIds.filter(id => !foundIds.has(id));
+    const foundIds = new Set(data?.map((g) => g.id) || []);
+    return generationIds.filter((id) => !foundIds.has(id));
   }
-} 
+}

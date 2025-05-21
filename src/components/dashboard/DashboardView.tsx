@@ -25,15 +25,19 @@ export function DashboardView({ user }: DashboardViewProps) {
             {/* User info */}
             <div className="flex items-center gap-4" data-test-id="user-info">
               <span className="text-sm text-muted-foreground">
-                Logged in as: <span className="font-medium text-foreground" data-test-id="user-email">{user.email}</span>
+                Logged in as:{" "}
+                <span className="font-medium text-foreground" data-test-id="user-email">
+                  {user.email}
+                </span>
               </span>
               <span className="text-sm text-muted-foreground">
-                Last login: <span className="font-medium text-foreground" data-test-id="user-last-login">
+                Last login:{" "}
+                <span className="font-medium text-foreground" data-test-id="user-last-login">
                   {new Date(user.lastLoginAt).toLocaleString()}
                 </span>
               </span>
             </div>
-            
+
             {/* Logout button */}
             <div className="flex items-center w-full sm:w-auto" data-test-id="user-panel-container">
               <UserPanel user={user} />
@@ -48,4 +52,4 @@ export function DashboardView({ user }: DashboardViewProps) {
       </main>
     </div>
   );
-} 
+}

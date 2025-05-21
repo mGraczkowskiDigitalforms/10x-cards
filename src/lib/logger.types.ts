@@ -1,10 +1,10 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export enum LogLevel {
-  DEBUG = 'debug',
-  INFO = 'info',
-  WARN = 'warn',
-  ERROR = 'error'
+  DEBUG = "debug",
+  INFO = "info",
+  WARN = "warn",
+  ERROR = "error",
 }
 
 // Sensitive data patterns
@@ -47,11 +47,13 @@ export interface Logger {
 }
 
 // Validation schemas
-export const logContextSchema = z.object({
-  timestamp: z.string(),
-  service: z.string(),
-  environment: z.string(),
-}).catchall(z.unknown());
+export const logContextSchema = z
+  .object({
+    timestamp: z.string(),
+    service: z.string(),
+    environment: z.string(),
+  })
+  .catchall(z.unknown());
 
 export const logEntrySchema = z.object({
   level: z.nativeEnum(LogLevel),
@@ -64,4 +66,4 @@ export const sanitizeOptionsSchema = z.object({
   patterns: z.array(z.instanceof(RegExp)).optional(),
   replacement: z.string().optional(),
   excludeKeys: z.array(z.string()).optional(),
-}); 
+});

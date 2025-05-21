@@ -1,5 +1,5 @@
-import type { APIRoute } from 'astro';
-import { createSupabaseServerInstance } from '../../../db/supabase.server';
+import type { APIRoute } from "astro";
+import { createSupabaseServerInstance } from "../../../db/supabase.server";
 
 export const prerender = false;
 
@@ -15,10 +15,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
 
     if (error) {
-      return new Response(
-        JSON.stringify({ error: error.message }),
-        { status: 400 }
-      );
+      return new Response(JSON.stringify({ error: error.message }), { status: 400 });
     }
 
     // After successful registration, automatically sign in the user
@@ -28,25 +25,19 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
 
     if (signInError) {
-      return new Response(
-        JSON.stringify({ error: signInError.message }),
-        { status: 400 }
-      );
+      return new Response(JSON.stringify({ error: signInError.message }), { status: 400 });
     }
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         user: {
           id: data.user?.id,
-          email: data.user?.email
-        }
+          email: data.user?.email,
+        },
       }),
       { status: 200 }
     );
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500 });
   }
-}; 
+};

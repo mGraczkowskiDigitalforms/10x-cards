@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Types
 export interface ModelParameters {
@@ -10,7 +10,7 @@ export interface ModelParameters {
 }
 
 export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant';
+  role: "system" | "user" | "assistant";
   content: string;
 }
 
@@ -39,17 +39,17 @@ export interface OpenRouterPayload {
   presence_penalty?: number;
   max_tokens?: number;
   response_format?: {
-    type: 'json_schema';
+    type: "json_schema";
     json_schema: Record<string, any>;
   };
 }
 
 export interface OpenRouterResponse {
   id: string;
-  choices: Array<{
+  choices: {
     message: ChatMessage;
     finish_reason: string;
-  }>;
+  }[];
   created: number;
   model: string;
   usage: {
@@ -68,14 +68,12 @@ export class OpenRouterError extends Error {
     public readonly details?: unknown
   ) {
     super(message);
-    this.name = 'OpenRouterError';
+    this.name = "OpenRouterError";
   }
 }
 
 // Input Validation Schemas
-export const messageSchema = z.string()
-  .min(1, 'Message cannot be empty')
-  .max(32768, 'Message is too long');
+export const messageSchema = z.string().min(1, "Message cannot be empty").max(32768, "Message is too long");
 
 export const modelParametersSchema = z.object({
   temperature: z.number().min(0).max(2).optional(),
@@ -85,17 +83,18 @@ export const modelParametersSchema = z.object({
   max_tokens: z.number().min(1).optional(),
 });
 
-export const modelNameSchema = z.string()
-  .min(1, 'Model name cannot be empty')
-  .refine((val) => !val.includes(' '), 'Model name cannot contain spaces');
+export const modelNameSchema = z
+  .string()
+  .min(1, "Model name cannot be empty")
+  .refine((val) => !val.includes(" "), "Model name cannot contain spaces");
 
 export const responseFormatSchema = z.object({
   name: z.string(),
   schema: z.object({
     type: z.string(),
     properties: z.record(z.any()),
-    required: z.array(z.string())
-  })
+    required: z.array(z.string()),
+  }),
 });
 
 // Configuration Validation Schemas
@@ -104,31 +103,35 @@ export const configSchema = z.object({
   apiUrl: z.string().url(),
   defaultModel: z.string().min(1),
   defaultParameters: modelParametersSchema.optional(),
-  retryConfig: z.object({
-    maxRetries: z.number().min(0).max(5).optional(),
-    initialDelay: z.number().min(100).max(1000).optional(),
-    maxDelay: z.number().min(1000).max(10000).optional(),
-    backoffFactor: z.number().min(1).max(3).optional(),
-  }).optional(),
+  retryConfig: z
+    .object({
+      maxRetries: z.number().min(0).max(5).optional(),
+      initialDelay: z.number().min(100).max(1000).optional(),
+      maxDelay: z.number().min(1000).max(10000).optional(),
+      backoffFactor: z.number().min(1).max(3).optional(),
+    })
+    .optional(),
 });
 
 // Response Validation Schemas
 export const chatMessageSchema = z.object({
-  role: z.enum(['system', 'user', 'assistant']),
-  content: z.string()
+  role: z.enum(["system", "user", "assistant"]),
+  content: z.string(),
 });
 
 export const responseSchema = z.object({
   id: z.string(),
-  choices: z.array(z.object({
-    message: chatMessageSchema,
-    finish_reason: z.string()
-  })),
+  choices: z.array(
+    z.object({
+      message: chatMessageSchema,
+      finish_reason: z.string(),
+    })
+  ),
   created: z.number(),
   model: z.string(),
   usage: z.object({
     prompt_tokens: z.number(),
     completion_tokens: z.number(),
-    total_tokens: z.number()
-  })
-}); 
+    total_tokens: z.number(),
+  }),
+});

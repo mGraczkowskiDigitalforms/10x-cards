@@ -7,14 +7,15 @@ const supabase = createSupabaseServerInstance({
   headers: Astro.request.headers,
 });
 
-const { data: { user } } = await supabase.auth.getUser();
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 
 // If user is not logged in, redirect to login page
 if (!user) {
-  return Astro.redirect('/auth/login');
+  return Astro.redirect("/auth/login");
 }
 
 // If user is logged in, redirect to generate page
-return Astro.redirect('/generate');
+return Astro.redirect("/generate");
 ---
-

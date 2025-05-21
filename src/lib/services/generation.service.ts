@@ -1,17 +1,17 @@
-import crypto from 'crypto';
-import type { SupabaseClient, User } from '@supabase/supabase-js';
-import type { Database } from '../../db/database.types';
-import type { FlashcardProposalDto, GenerationCreateResponseDto } from '../../types';
-import { OpenRouterService } from '../openrouter.service';
-import { createOpenRouterConfigFromEnv } from '../openrouter.config';
+import crypto from "crypto";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
+import type { Database } from "../../db/database.types";
+import type { FlashcardProposalDto, GenerationCreateResponseDto } from "../../types";
+import { OpenRouterService } from "../openrouter.service";
+import { createOpenRouterConfigFromEnv } from "../openrouter.config";
 
 // AI Service error types
-const DEFAULT_MODEL = 'gpt-4o-mini';
+const DEFAULT_MODEL = "gpt-4o-mini";
 
-type AiServiceError = {
-  code: 'TIMEOUT' | 'API_ERROR' | 'INVALID_RESPONSE';
+interface AiServiceError {
+  code: "TIMEOUT" | "API_ERROR" | "INVALID_RESPONSE";
   message: string;
-};
+}
 
 export class GenerationService {
   private readonly openRouter: OpenRouterService;
@@ -22,19 +22,22 @@ export class GenerationService {
     user: User
   ) {
     this.user = user;
-    this.openRouter = new OpenRouterService(createOpenRouterConfigFromEnv({
-      defaultModel: DEFAULT_MODEL,
-      defaultParameters: {
-        temperature: 0.7,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0,
-        max_tokens: 1000
-      }
-    }));
+    this.openRouter = new OpenRouterService(
+      createOpenRouterConfigFromEnv({
+        defaultModel: DEFAULT_MODEL,
+        defaultParameters: {
+          temperature: 0.7,
+          top_p: 1,
+          frequency_penalty: 0,
+          presence_penalty: 0,
+          max_tokens: 1000,
+        },
+      })
+    );
 
     // Set up system message for flashcard generation
-    this.openRouter.setSystemMessage(`You are a helpful AI assistant that creates high-quality flashcards from provided text.
+    this.openRouter
+      .setSystemMessage(`You are a helpful AI assistant that creates high-quality flashcards from provided text.
 Your task is to generate concise and effective flashcards following these rules:
 
 1. Create clear, focused questions for the front and concise, accurate answers for the back
@@ -71,49 +74,46 @@ Example response format:
               type: "object",
               properties: {
                 front: { type: "string" },
-                back: { type: "string" }
+                back: { type: "string" },
               },
-              required: ["front", "back"]
-            }
-          }
+              required: ["front", "back"],
+            },
+          },
         },
-        required: ["flashcards"]
-      }
+        required: ["flashcards"],
+      },
     });
   }
 
   private generateTextHash(text: string): string {
-    return crypto
-      .createHash('md5')
-      .update(text)
-      .digest('hex');
+    return crypto.createHash("md5").update(text).digest("hex");
   }
 
   private async callAiService(text: string): Promise<FlashcardProposalDto[]> {
     try {
       // Set the user's text as input
       this.openRouter.setUserMessage(text);
-      
+
       // Get response from OpenRouter
       const response = await this.openRouter.sendChatMessage(text);
-      
+
       try {
         // Parse the response
         const responseData = JSON.parse(response.choices[0].message.content);
-        
+
         // Validate response structure
-        if (!responseData || typeof responseData !== 'object' || !Array.isArray(responseData.flashcards)) {
-          throw new Error('Invalid response structure: expected object with flashcards array');
+        if (!responseData || typeof responseData !== "object" || !Array.isArray(responseData.flashcards)) {
+          throw new Error("Invalid response structure: expected object with flashcards array");
         }
 
         // Validate and transform each flashcard
         return responseData.flashcards.map((card: unknown, index: number) => {
-          if (!card || typeof card !== 'object') {
+          if (!card || typeof card !== "object") {
             throw new Error(`Flashcard at index ${index} is not an object`);
           }
 
           const typedCard = card as { front?: string; back?: string };
-          
+
           if (!typedCard.front || !typedCard.back) {
             throw new Error(`Flashcard at index ${index} is missing required properties`);
           }
@@ -121,45 +121,48 @@ Example response format:
           return {
             front: typedCard.front,
             back: typedCard.back,
-            source: 'ai-full' as const
+            source: "ai-full" as const,
           };
         });
       } catch (parseError: unknown) {
         if (parseError instanceof Error) {
           throw new Error(`Invalid response format: ${parseError.message}`);
         }
-        throw new Error('Invalid response format: Unknown parsing error');
+        throw new Error("Invalid response format: Unknown parsing error");
       }
     } catch (error) {
       // Log detailed error information
-      console.error('OpenRouter API error:', {
-        error: error instanceof Error ? {
-          name: error.name,
-          message: error.message,
-          stack: error.stack
-        } : error,
-        responseError: error instanceof Error && 'response' in error ? 
-          await (error as any).response?.text() : undefined
+      console.error("OpenRouter API error:", {
+        error:
+          error instanceof Error
+            ? {
+                name: error.name,
+                message: error.message,
+                stack: error.stack,
+              }
+            : error,
+        responseError:
+          error instanceof Error && "response" in error ? await (error as any).response?.text() : undefined,
       });
 
       const aiError = error as AiServiceError;
-      
+
       await this.logGenerationError({
         userId: this.user.id,
-        errorCode: aiError.code || 'API_ERROR',
-        errorMessage: aiError.message || 'Unknown AI service error',
+        errorCode: aiError.code || "API_ERROR",
+        errorMessage: aiError.message || "Unknown AI service error",
         sourceTextHash: this.generateTextHash(text),
         sourceTextLength: text.length,
-        model: DEFAULT_MODEL
+        model: DEFAULT_MODEL,
       });
 
-      throw new Error(`AI Service error: ${aiError.message || 'Unknown error'}`);
+      throw new Error(`AI Service error: ${aiError.message || "Unknown error"}`);
     }
   }
 
   private async checkExistingGeneration(userId: string, sourceTextHash: string) {
     const { data: existingGeneration } = await this.supabaseClient
-      .from('generations')
+      .from("generations")
       .select()
       .match({ user_id: userId, source_text_hash: sourceTextHash })
       .single();
@@ -173,34 +176,32 @@ Example response format:
     errorMessage: string;
     sourceTextHash: string;
     sourceTextLength: number;
-    model:string;
+    model: string;
   }) {
     try {
       const timestamp = new Date().toISOString();
-      const { error } = await this.supabaseClient
-        .from('generation_error_logs')
-        .insert({
-          user_id: params.userId,
-          error_code: params.errorCode,
-          error_message: params.errorMessage,
-          source_text_hash: params.sourceTextHash,
-          source_text_length: params.sourceTextLength,
-          model: params.model
-        });
+      const { error } = await this.supabaseClient.from("generation_error_logs").insert({
+        user_id: params.userId,
+        error_code: params.errorCode,
+        error_message: params.errorMessage,
+        source_text_hash: params.sourceTextHash,
+        source_text_length: params.sourceTextLength,
+        model: params.model,
+      });
 
       if (error) {
-        console.error('Failed to log generation error:', {
+        console.error("Failed to log generation error:", {
           error,
           params,
-          timestamp
+          timestamp,
         });
       }
     } catch (error) {
       // Log to console as last resort if we can't save to database
-      console.error('Critical error while logging generation error:', {
+      console.error("Critical error while logging generation error:", {
         error,
         originalError: params,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
   }
@@ -215,21 +216,23 @@ Example response format:
   }) {
     // Check for existing generation with the same hash
     const existingGeneration = await this.checkExistingGeneration(params.userId, params.sourceTextHash);
-    
+
     if (existingGeneration) {
       await this.logGenerationError({
         userId: params.userId,
-        errorCode: 'DUPLICATE_HASH',
-        errorMessage: 'Generation with this text hash already exists',
+        errorCode: "DUPLICATE_HASH",
+        errorMessage: "Generation with this text hash already exists",
         sourceTextHash: params.sourceTextHash,
         sourceTextLength: params.textLength,
-        model: params.model
+        model: params.model,
       });
-      throw new Error('Flashcards for this text have already been generated. Please use different text or check your existing flashcards.');
+      throw new Error(
+        "Flashcards for this text have already been generated. Please use different text or check your existing flashcards."
+      );
     }
 
     const { data: generation, error: generationError } = await this.supabaseClient
-      .from('generations')
+      .from("generations")
       .insert({
         user_id: params.userId,
         model: DEFAULT_MODEL,
@@ -244,13 +247,15 @@ Example response format:
     if (generationError) {
       await this.logGenerationError({
         userId: params.userId,
-        errorCode: 'DB_ERROR',
+        errorCode: "DB_ERROR",
         errorMessage: generationError.message,
         sourceTextHash: params.sourceTextHash,
         sourceTextLength: params.textLength,
-        model: params.model
+        model: params.model,
       });
-      throw new Error(generationError instanceof Error ? generationError.message : 'Failed to generate flashcards. Please try again.');
+      throw new Error(
+        generationError instanceof Error ? generationError.message : "Failed to generate flashcards. Please try again."
+      );
     }
 
     return generation;
@@ -258,41 +263,41 @@ Example response format:
 
   async generateFlashcards(text: string, userId: string): Promise<GenerationCreateResponseDto> {
     const startTime = Date.now();
-    
+
     try {
       const sourceTextHash = this.generateTextHash(text);
       const flashcardsProposal = await this.callAiService(text);
-      
+
       const generationDuration = Date.now() - startTime;
-      
+
       const generation = await this.saveGeneration({
         userId,
         sourceTextHash,
         textLength: text.length,
         flashcardsCount: flashcardsProposal.length,
         generationDuration,
-        model: DEFAULT_MODEL
+        model: DEFAULT_MODEL,
       });
 
       return {
         generation: {
           id: generation.id,
           generated_count: generation.generated_count,
-          created_at: generation.created_at
+          created_at: generation.created_at,
         },
-        flashcards_proposal: flashcardsProposal
+        flashcards_proposal: flashcardsProposal,
       };
     } catch (error) {
       await this.logGenerationError({
         userId,
-        errorCode: 'GENERATION_ERROR',
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: "GENERATION_ERROR",
+        errorMessage: error instanceof Error ? error.message : "Unknown error",
         sourceTextHash: this.generateTextHash(text),
         sourceTextLength: text.length,
-        model: DEFAULT_MODEL
+        model: DEFAULT_MODEL,
       });
-      
-      throw new Error(error instanceof Error ? error.message : 'Failed to generate flashcards. Please try again.');
+
+      throw new Error(error instanceof Error ? error.message : "Failed to generate flashcards. Please try again.");
     }
   }
-} 
+}

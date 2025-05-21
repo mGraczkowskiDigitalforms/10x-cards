@@ -1,7 +1,7 @@
 ---
-import AuthLayout from '@/layouts/AuthLayout.astro';
-import { LoginForm } from '@/features/auth/components';
-import { createSupabaseServerInstance } from '@/db/supabase.server';
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import { LoginForm } from "@/features/auth/components";
+import { createSupabaseServerInstance } from "@/db/supabase.server";
 
 // Check if user is already logged in
 const supabase = createSupabaseServerInstance({
@@ -9,17 +9,16 @@ const supabase = createSupabaseServerInstance({
   headers: Astro.request.headers,
 });
 
-const { data: { user } } = await supabase.auth.getUser();
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 
 // If user is logged in, redirect to generate page
 if (user) {
-  return Astro.redirect('/generate');
+  return Astro.redirect("/generate");
 }
 ---
 
-<AuthLayout 
-  title="Welcome back" 
-  subtitle="Enter your email and password to sign in to your account"
->
+<AuthLayout title="Welcome back" subtitle="Enter your email and password to sign in to your account">
   <LoginForm client:load />
-</AuthLayout> 
+</AuthLayout>

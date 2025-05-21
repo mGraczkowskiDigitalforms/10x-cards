@@ -1,7 +1,7 @@
 ---
-import AuthLayout from '@/layouts/AuthLayout.astro';
-import { RegisterForm } from '@/features/auth/components';
-import { createSupabaseServerInstance } from '@/db/supabase.server';
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import { RegisterForm } from "@/features/auth/components";
+import { createSupabaseServerInstance } from "@/db/supabase.server";
 
 // Check if user is already logged in
 const supabase = createSupabaseServerInstance({
@@ -9,17 +9,16 @@ const supabase = createSupabaseServerInstance({
   headers: Astro.request.headers,
 });
 
-const { data: { user } } = await supabase.auth.getUser();
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 
 // If user is logged in, redirect to generate page
 if (user) {
-  return Astro.redirect('/generate');
+  return Astro.redirect("/generate");
 }
 ---
 
-<AuthLayout 
-  title="Create an account" 
-  subtitle="Enter your email below to create your account"
->
+<AuthLayout title="Create an account" subtitle="Enter your email below to create your account">
   <RegisterForm client:load />
-</AuthLayout> 
+</AuthLayout>

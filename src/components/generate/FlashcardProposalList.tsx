@@ -1,5 +1,5 @@
-import type { FlashcardProposalViewModel } from './GenerateView';
-import { FlashcardProposalItem } from './FlashcardProposalItem';
+import type { FlashcardProposalViewModel } from "./GenerateView";
+import { FlashcardProposalItem } from "./FlashcardProposalItem";
 
 interface FlashcardProposalListProps {
   proposals: FlashcardProposalViewModel[];
@@ -8,12 +8,7 @@ interface FlashcardProposalListProps {
   onReject: (index: number) => void;
 }
 
-export function FlashcardProposalList({
-  proposals,
-  onAccept,
-  onEdit,
-  onReject,
-}: FlashcardProposalListProps) {
+export function FlashcardProposalList({ proposals, onAccept, onEdit, onReject }: FlashcardProposalListProps) {
   if (proposals.length === 0) {
     return null;
   }
@@ -23,7 +18,7 @@ export function FlashcardProposalList({
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Generated Flashcards</h2>
         <div className="text-sm text-gray-500" data-test-id="flashcard-stats">
-          {proposals.filter(p => p.accepted).length} of {proposals.length} accepted
+          {proposals.filter((p) => p.accepted).length} of {proposals.length} accepted
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-test-id="flashcard-grid">
@@ -45,4 +40,4 @@ export function FlashcardProposalList({
       </div>
     </div>
   );
-} 
+}

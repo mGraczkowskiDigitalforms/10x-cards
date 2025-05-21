@@ -1,32 +1,27 @@
-import type { Logger, LogContext, SanitizeOptions } from './logger.types';
-import { LogLevel, logEntrySchema, SENSITIVE_PATTERNS, sanitizeOptionsSchema } from './logger.types';
+import type { Logger, LogContext, SanitizeOptions } from "./logger.types";
+import { LogLevel, logEntrySchema, SENSITIVE_PATTERNS, sanitizeOptionsSchema } from "./logger.types";
 
 export class ConsoleLogger implements Logger {
   private readonly defaultContext: Partial<LogContext>;
   private readonly defaultSanitizeOptions: Required<SanitizeOptions> = {
     patterns: Object.values(SENSITIVE_PATTERNS),
-    replacement: '[REDACTED]',
-    excludeKeys: ['timestamp', 'service', 'environment', 'level']
+    replacement: "[REDACTED]",
+    excludeKeys: ["timestamp", "service", "environment", "level"],
   };
 
   constructor(service: string) {
     this.defaultContext = {
       service,
-      environment: process.env.NODE_ENV ?? 'development'
+      environment: process.env.NODE_ENV ?? "development",
     };
   }
 
-  private createLogEntry(
-    level: LogLevel,
-    message: string,
-    error?: Error,
-    context?: Partial<LogContext>
-  ) {
+  private createLogEntry(level: LogLevel, message: string, error?: Error, context?: Partial<LogContext>) {
     const timestamp = new Date().toISOString();
     const fullContext = {
       ...this.defaultContext,
       ...context,
-      timestamp
+      timestamp,
     };
 
     // Sanitize context before creating log entry
@@ -38,35 +33,35 @@ export class ConsoleLogger implements Logger {
       level,
       message: sanitizedMessage,
       context: sanitizedContext,
-      error: sanitizedError
+      error: sanitizedError,
     });
   }
 
   private formatError(error: Error): string {
-    return `${error.name}: ${error.message}\n${error.stack ?? ''}`;
+    return `${error.name}: ${error.message}\n${error.stack ?? ""}`;
   }
 
   private sanitizeError(error: Error): Error {
     const sanitizedMessage = this.sanitize(error.message) as string;
-    const sanitizedStack = error.stack ? this.sanitize(error.stack) as string : undefined;
-    
+    const sanitizedStack = error.stack ? (this.sanitize(error.stack) as string) : undefined;
+
     const sanitizedError = new Error(sanitizedMessage);
     sanitizedError.name = error.name;
     sanitizedError.stack = sanitizedStack;
-    
+
     return sanitizedError;
   }
 
   public sanitize(data: unknown, options?: SanitizeOptions): unknown {
     const sanitizeOpts = sanitizeOptionsSchema.parse({
       ...this.defaultSanitizeOptions,
-      ...options
+      ...options,
     });
 
     const sanitizeValue = (value: string): string => {
       let result = value;
       for (const pattern of sanitizeOpts.patterns ?? []) {
-        result = result.replace(pattern, sanitizeOpts.replacement ?? '[REDACTED]');
+        result = result.replace(pattern, sanitizeOpts.replacement ?? "[REDACTED]");
       }
       return result;
     };
@@ -81,13 +76,13 @@ export class ConsoleLogger implements Logger {
           continue;
         }
 
-        if (typeof value === 'string') {
+        if (typeof value === "string") {
           result[key] = sanitizeValue(value);
         } else if (value instanceof Error) {
           result[key] = this.sanitizeError(value);
         } else if (Array.isArray(value)) {
-          result[key] = value.map(item => this.sanitize(item, sanitizeOpts));
-        } else if (value && typeof value === 'object') {
+          result[key] = value.map((item) => this.sanitize(item, sanitizeOpts));
+        } else if (value && typeof value === "object") {
           result[key] = this.sanitize(value, sanitizeOpts);
         } else {
           result[key] = value;
@@ -97,13 +92,13 @@ export class ConsoleLogger implements Logger {
       return result;
     };
 
-    if (typeof data === 'string') {
+    if (typeof data === "string") {
       return sanitizeValue(data);
     } else if (data instanceof Error) {
       return this.sanitizeError(data);
     } else if (Array.isArray(data)) {
-      return data.map(item => this.sanitize(item, sanitizeOpts));
-    } else if (data && typeof data === 'object') {
+      return data.map((item) => this.sanitize(item, sanitizeOpts));
+    } else if (data && typeof data === "object") {
       return sanitizeObject(data as Record<string, unknown>);
     }
 
@@ -129,8 +124,8 @@ export class ConsoleLogger implements Logger {
     const entry = this.createLogEntry(LogLevel.ERROR, message, error, context);
     console.error(
       `[${entry.context.service}] ${entry.message}`,
-      error ? `\n${this.formatError(entry.error as Error)}` : '',
+      error ? `\n${this.formatError(entry.error as Error)}` : "",
       { context: entry.context }
     );
   }
-} 
+}

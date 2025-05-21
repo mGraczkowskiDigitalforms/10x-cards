@@ -1,6 +1,6 @@
 ---
-import { ViewTransitions } from 'astro:transitions';
-import { Toaster } from '@/components/ui/sonner';
+import { ViewTransitions } from "astro:transitions";
+import { Toaster } from "@/components/ui/sonner";
 import "../styles/global.css";
 
 interface Props {
@@ -8,10 +8,7 @@ interface Props {
   description?: string;
 }
 
-const { 
-  title = "10X Cards", 
-  description = "Boost your productivity with 10X Cards" 
-} = Astro.props;
+const { title = "10X Cards", description = "Boost your productivity with 10X Cards" } = Astro.props;
 ---
 
 <!doctype html>
@@ -43,6 +40,8 @@ const {
   }
 
   body {
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 </style>

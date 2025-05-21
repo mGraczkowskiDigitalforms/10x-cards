@@ -1,22 +1,22 @@
-import type { 
-  ModelParameters, 
-  ChatMessage, 
+import type {
+  ModelParameters,
+  ChatMessage,
   OpenRouterConfig,
   OpenRouterPayload,
   OpenRouterResponse,
-  RetryConfig
-} from './openrouter.types';
-import type { Logger } from './logger.types';
-import { 
-  configSchema, 
-  responseSchema, 
+  RetryConfig,
+} from "./openrouter.types";
+import type { Logger } from "./logger.types";
+import {
+  configSchema,
+  responseSchema,
   OpenRouterError,
   messageSchema,
   modelParametersSchema,
   modelNameSchema,
-  responseFormatSchema
-} from './openrouter.types';
-import { ConsoleLogger } from './console.logger';
+  responseFormatSchema,
+} from "./openrouter.types";
+import { ConsoleLogger } from "./console.logger";
 
 export class OpenRouterService {
   private readonly apiKey: string;
@@ -31,7 +31,7 @@ export class OpenRouterService {
 
   constructor(config: OpenRouterConfig) {
     // Initialize logger
-    this.logger = new ConsoleLogger('OpenRouterService');
+    this.logger = new ConsoleLogger("OpenRouterService");
 
     try {
       // Validate config
@@ -46,7 +46,7 @@ export class OpenRouterService {
         top_p: 1,
         frequency_penalty: 0,
         presence_penalty: 0,
-        max_tokens: 150
+        max_tokens: 150,
       };
 
       // Initialize retry config with defaults
@@ -54,24 +54,27 @@ export class OpenRouterService {
         maxRetries: validatedConfig.retryConfig?.maxRetries ?? 3,
         initialDelay: validatedConfig.retryConfig?.initialDelay ?? 300,
         maxDelay: validatedConfig.retryConfig?.maxDelay ?? 3000,
-        backoffFactor: validatedConfig.retryConfig?.backoffFactor ?? 2
+        backoffFactor: validatedConfig.retryConfig?.backoffFactor ?? 2,
       };
 
       // Validate API key format and environment
       if (!process.env.NODE_ENV) {
-        throw new Error('Environment not properly configured');
+        throw new Error("Environment not properly configured");
       }
 
-      if (!this.apiKey.startsWith('sk-')) {
-        throw new Error('Invalid API key format');
+      if (!this.apiKey.startsWith("sk-")) {
+        throw new Error("Invalid API key format");
       }
 
-      this.logger.info('OpenRouter service initialized successfully', {
+      this.logger.info("OpenRouter service initialized successfully", {
         model: this.currentModel,
-        apiUrl: this.apiUrl
+        apiUrl: this.apiUrl,
       });
     } catch (error) {
-      this.logger.error('Failed to initialize OpenRouter service', error instanceof Error ? error : new Error(String(error)));
+      this.logger.error(
+        "Failed to initialize OpenRouter service",
+        error instanceof Error ? error : new Error(String(error))
+      );
       throw error;
     }
   }
@@ -79,7 +82,7 @@ export class OpenRouterService {
   // Public methods
   public async sendChatMessage(userMessage: string): Promise<OpenRouterResponse> {
     try {
-      this.logger.debug('Sending chat message', { model: this.currentModel });
+      this.logger.debug("Sending chat message", { model: this.currentModel });
 
       // Validate input
       const validatedMessage = messageSchema.parse(userMessage);
@@ -96,10 +99,10 @@ export class OpenRouterService {
       // Validate and return response
       const result = await this._validateResponse(response);
 
-      this.logger.info('Chat message sent successfully', {
+      this.logger.info("Chat message sent successfully", {
         model: this.currentModel,
         messageTokens: result.usage.prompt_tokens,
-        responseTokens: result.usage.completion_tokens
+        responseTokens: result.usage.completion_tokens,
       });
 
       return result;
@@ -114,7 +117,7 @@ export class OpenRouterService {
       // Validate input
       const validatedMessage = messageSchema.parse(message);
       this.systemMessage = validatedMessage;
-      this.logger.debug('System message set', { messageLength: message.length });
+      this.logger.debug("System message set", { messageLength: message.length });
     } catch (error) {
       this._handleError(error);
       throw error;
@@ -126,7 +129,7 @@ export class OpenRouterService {
       // Validate input
       const validatedMessage = messageSchema.parse(message);
       this.userMessage = validatedMessage;
-      this.logger.debug('User message set', { messageLength: message.length });
+      this.logger.debug("User message set", { messageLength: message.length });
     } catch (error) {
       this._handleError(error);
       throw error;
@@ -144,9 +147,9 @@ export class OpenRouterService {
         this.modelParameters = { ...this.modelParameters, ...validatedParameters };
       }
 
-      this.logger.info('Model configuration updated', {
+      this.logger.info("Model configuration updated", {
         model: this.currentModel,
-        parameters: this.modelParameters
+        parameters: this.modelParameters,
       });
     } catch (error) {
       this._handleError(error);
@@ -159,7 +162,7 @@ export class OpenRouterService {
       // Validate input
       const validatedSchema = responseFormatSchema.parse(schema);
       this.responseFormat = validatedSchema;
-      this.logger.debug('Response format set', { schema });
+      this.logger.debug("Response format set", { schema });
     } catch (error) {
       this._handleError(error);
       throw error;
@@ -173,25 +176,25 @@ export class OpenRouterService {
     // Add system message if present
     if (this.systemMessage) {
       messages.push({
-        role: 'system',
-        content: this.systemMessage
+        role: "system",
+        content: this.systemMessage,
       });
     }
 
     // Add user message if present
     if (this.userMessage) {
       messages.push({
-        role: 'user',
-        content: this.userMessage
+        role: "user",
+        content: this.userMessage,
       });
     }
 
     if (messages.length === 0) {
       const error = new OpenRouterError(
-        'No messages to send. Set at least one message using setSystemMessage or setUserMessage.',
-        'NO_MESSAGES'
+        "No messages to send. Set at least one message using setSystemMessage or setUserMessage.",
+        "NO_MESSAGES"
       );
-      this.logger.error('Failed to prepare payload', error);
+      this.logger.error("Failed to prepare payload", error);
       throw error;
     }
 
@@ -199,22 +202,22 @@ export class OpenRouterService {
     const payload: OpenRouterPayload = {
       model: this.currentModel,
       messages,
-      ...this.modelParameters
+      ...this.modelParameters,
     };
 
     // Add response format if present
     if (this.responseFormat) {
-      console.log('Setting response format:', this.responseFormat);
+      console.log("Setting response format:", this.responseFormat);
       payload.response_format = {
         type: "json_schema",
-        json_schema: this.responseFormat
+        json_schema: this.responseFormat,
       };
     }
 
-    this.logger.debug('Payload prepared', {
+    this.logger.debug("Payload prepared", {
       model: payload.model,
       messagesCount: messages.length,
-      hasResponseFormat: !!this.responseFormat
+      hasResponseFormat: !!this.responseFormat,
     });
 
     return payload;
@@ -226,14 +229,14 @@ export class OpenRouterService {
 
     while (attempt <= this.retryConfig.maxRetries) {
       try {
-        this.logger.debug('Sending request', { attempt: attempt + 1 });
+        this.logger.debug("Sending request", { attempt: attempt + 1 });
         return await this._sendRequest(payload);
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        
+
         // Don't retry if it's not a retryable error
         if (!this._isRetryableError(lastError)) {
-          this.logger.warn('Non-retryable error encountered', { error: lastError.message });
+          this.logger.warn("Non-retryable error encountered", { error: lastError.message });
           throw lastError;
         }
 
@@ -241,11 +244,11 @@ export class OpenRouterService {
         if (attempt === this.retryConfig.maxRetries) {
           const retryError = new OpenRouterError(
             `Failed after ${attempt} retries: ${lastError.message}`,
-            'MAX_RETRIES_EXCEEDED',
+            "MAX_RETRIES_EXCEEDED",
             undefined,
             lastError
           );
-          this.logger.error('Max retries exceeded', retryError);
+          this.logger.error("Max retries exceeded", retryError);
           throw retryError;
         }
 
@@ -255,61 +258,61 @@ export class OpenRouterService {
           this.retryConfig.maxDelay
         );
 
-        this.logger.debug('Retrying request', {
+        this.logger.debug("Retrying request", {
           attempt: attempt + 1,
           delay,
-          error: lastError.message
+          error: lastError.message,
         });
 
         // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
         attempt++;
       }
     }
 
     // This should never happen due to the while loop condition
-    throw lastError ?? new Error('Unknown error during retry');
+    throw lastError ?? new Error("Unknown error during retry");
   }
 
   private async _sendRequest(payload: OpenRouterPayload): Promise<Response> {
     try {
-      console.log('OpenRouter request details:', {
+      console.log("OpenRouter request details:", {
         url: this.apiUrl,
         model: payload.model,
         messageCount: payload.messages.length,
         hasResponseFormat: !!payload.response_format,
         messages: payload.messages,
         responseFormat: payload.response_format,
-        fullPayload: JSON.stringify(payload, null, 2)
+        fullPayload: JSON.stringify(payload, null, 2),
       });
 
       const response = await fetch(this.apiUrl, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
-          'HTTP-Referer': 'https://10x-cards.vercel.app',
-          'X-Title': '10X Cards'
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.apiKey}`,
+          "HTTP-Referer": "https://10x-cards.vercel.app",
+          "X-Title": "10X Cards",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       const responseText = await response.text();
-      console.log('OpenRouter raw response text:', responseText);
+      console.log("OpenRouter raw response text:", responseText);
 
       if (!response.ok) {
-        console.error('OpenRouter API error response:', {
+        console.error("OpenRouter API error response:", {
           status: response.status,
           statusText: response.statusText,
           headers: Object.fromEntries(response.headers.entries()),
           body: responseText,
-          requestPayload: payload
+          requestPayload: payload,
         });
 
-        const errorData = responseText.startsWith('{') ? JSON.parse(responseText) : { error: responseText };
+        const errorData = responseText.startsWith("{") ? JSON.parse(responseText) : { error: responseText };
         const error = new OpenRouterError(
           `API request failed: ${response.status} ${response.statusText}`,
-          'API_ERROR',
+          "API_ERROR",
           response.status,
           errorData
         );
@@ -320,7 +323,7 @@ export class OpenRouterService {
       return new Response(responseText, {
         status: response.status,
         statusText: response.statusText,
-        headers: response.headers
+        headers: response.headers,
       });
     } catch (error) {
       if (error instanceof OpenRouterError) {
@@ -328,9 +331,9 @@ export class OpenRouterService {
       }
       const networkError = new OpenRouterError(
         `Failed to send request: ${error instanceof Error ? error.message : String(error)}`,
-        'NETWORK_ERROR'
+        "NETWORK_ERROR"
       );
-      this.logger.error('Network request failed', networkError);
+      this.logger.error("Network request failed", networkError);
       throw networkError;
     }
   }
@@ -338,15 +341,15 @@ export class OpenRouterService {
   private async _validateResponse(response: Response): Promise<OpenRouterResponse> {
     try {
       const data = await response.json();
-      console.log('Raw API response:', JSON.stringify(data, null, 2));
-      
+      console.log("Raw API response:", JSON.stringify(data, null, 2));
+
       try {
         return responseSchema.parse(data);
       } catch (validationError) {
-        console.error('Response validation error:', validationError);
+        console.error("Response validation error:", validationError);
         throw new OpenRouterError(
-          `Invalid response format: ${validationError instanceof Error ? validationError.message : 'Unknown validation error'}`,
-          'INVALID_RESPONSE',
+          `Invalid response format: ${validationError instanceof Error ? validationError.message : "Unknown validation error"}`,
+          "INVALID_RESPONSE",
           undefined,
           validationError
         );
@@ -357,9 +360,9 @@ export class OpenRouterService {
       }
       const validationError = new OpenRouterError(
         `Invalid response format: ${error instanceof Error ? error.message : String(error)}`,
-        'INVALID_RESPONSE'
+        "INVALID_RESPONSE"
       );
-      this.logger.error('Response validation failed', validationError);
+      this.logger.error("Response validation failed", validationError);
       throw validationError;
     }
   }
@@ -367,31 +370,35 @@ export class OpenRouterService {
   private _isRetryableError(error: Error): boolean {
     if (error instanceof OpenRouterError) {
       // Retry on network errors and 5xx server errors
-      return error.code === 'NETWORK_ERROR' || 
-             (error.code === 'API_ERROR' && error.status ? error.status >= 500 : false);
+      return (
+        error.code === "NETWORK_ERROR" || (error.code === "API_ERROR" && error.status ? error.status >= 500 : false)
+      );
     }
     // Retry on network errors
-    return error.message.includes('network') || error.message.includes('timeout');
+    return error.message.includes("network") || error.message.includes("timeout");
   }
 
   private _handleError(error: unknown): void {
     // Log error details without sensitive information
-    const errorDetails = error instanceof OpenRouterError ? {
-      code: error.code,
-      status: error.status,
-      message: error.message
-    } : {
-      message: String(error)
-    };
+    const errorDetails =
+      error instanceof OpenRouterError
+        ? {
+            code: error.code,
+            status: error.status,
+            message: error.message,
+          }
+        : {
+            message: String(error),
+          };
 
     // Log error with appropriate context
     if (error instanceof OpenRouterError) {
       this.logger.error(error.message, error, {
         code: error.code,
-        status: error.status
+        status: error.status,
       });
     } else {
-      this.logger.error('An unexpected error occurred', error instanceof Error ? error : new Error(String(error)));
+      this.logger.error("An unexpected error occurred", error instanceof Error ? error : new Error(String(error)));
     }
   }
-} 
+}

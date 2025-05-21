@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 interface GenerateButtonProps {
   disabled?: boolean;
@@ -9,12 +9,12 @@ interface GenerateButtonProps {
   onClick?: () => void;
 }
 
-export function GenerateButton({ 
-  disabled = false, 
-  isTextValid, 
+export function GenerateButton({
+  disabled = false,
+  isTextValid,
   textLength,
   isLoading = false,
-  onClick 
+  onClick,
 }: GenerateButtonProps) {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (onClick) {
@@ -24,7 +24,7 @@ export function GenerateButton({
   };
 
   return (
-    <Button 
+    <Button
       type={onClick ? "button" : "submit"}
       disabled={disabled || !isTextValid || textLength < 1000 || isLoading}
       className="w-full sm:w-auto"
@@ -37,8 +37,8 @@ export function GenerateButton({
           Generating...
         </>
       ) : (
-        'Generate Flashcards'
+        "Generate Flashcards"
       )}
     </Button>
   );
-} 
+}

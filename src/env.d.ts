@@ -1,8 +1,8 @@
 /// <reference types="astro/client" />
 
-import type { SupabaseClient, User } from '@supabase/supabase-js';
-import type { Database } from './db/database.types';
-import type { AstroLocals } from './types';
+import type { SupabaseClient, User } from "@supabase/supabase-js";
+import type { Database } from "./db/database.types";
+import type { AstroLocals } from "./types";
 
 declare global {
   namespace App {

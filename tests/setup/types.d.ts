@@ -1,4 +1,4 @@
-declare module '*.astro' {
+declare module "*.astro" {
   const Component: {
     default: {
       render: (this: any) => Promise<string>;
@@ -12,4 +12,4 @@ declare namespace Astro {
   interface Request {
     headers: Headers;
   }
-} 
+}

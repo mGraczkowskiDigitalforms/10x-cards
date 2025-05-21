@@ -1,6 +1,6 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import { DashboardView } from '@/components/dashboard/DashboardView';
+import Layout from "@/layouts/Layout.astro";
+import { DashboardView } from "@/components/dashboard/DashboardView";
 import { createSupabaseServerInstance } from "@/db/supabase.server";
 
 // Check if user is logged in
@@ -13,29 +13,31 @@ let user;
 let lastLoginAt;
 
 try {
-  const { data: { user: userData, session } } = await supabase.auth.getUser();
+  const {
+    data: { user: userData, session },
+  } = await supabase.auth.getUser();
 
   // If user is not logged in, redirect to login page
   if (!userData) {
-    return Astro.redirect('/auth/login');
+    return Astro.redirect("/auth/login");
   }
 
   // Store user data and last login time
   user = userData;
   lastLoginAt = session?.user?.last_sign_in_at || new Date().toISOString();
 } catch (error) {
-  console.error('Error getting user:', error);
-  return Astro.redirect('/auth/login');
+  console.error("Error getting user:", error);
+  return Astro.redirect("/auth/login");
 }
 ---
 
 <Layout title="Generate Flashcards">
-  <DashboardView 
+  <DashboardView
     client:only="react"
     user={{
       id: user.id,
       email: user.email!,
       lastLoginAt,
-    }} 
+    }}
   />
-</Layout> 
+</Layout>

@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { toast } from 'sonner';
-import { GenerateButton } from './GenerateButton';
+import { useState, useEffect } from "react";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
+import { GenerateButton } from "./GenerateButton";
 
 interface TextInputFormProps {
   onSubmit: (text: string) => void;
@@ -12,23 +12,23 @@ interface TextInputFormProps {
 }
 
 export function TextInputForm({ onSubmit, disabled, shouldReset, isLoading }: TextInputFormProps) {
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (shouldReset) {
-      setText('');
+      setText("");
       setError(null);
     }
   }, [shouldReset]);
 
   const validateText = (value: string): boolean => {
     if (value.length < 1000) {
-      setError('Text must be at least 1000 characters long');
+      setError("Text must be at least 1000 characters long");
       return false;
     }
     if (value.length > 10000) {
-      setError('Text cannot be longer than 10000 characters');
+      setError("Text cannot be longer than 10000 characters");
       return false;
     }
     setError(null);
@@ -49,22 +49,22 @@ export function TextInputForm({ onSubmit, disabled, shouldReset, isLoading }: Te
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    const pastedText = e.clipboardData.getData('text');
-    
+    const pastedText = e.clipboardData.getData("text");
+
     // Calculate where the paste would occur and what the final text would be
     const selectionStart = e.currentTarget.selectionStart ?? 0;
     const selectionEnd = e.currentTarget.selectionEnd ?? 0;
     const beforeSelection = text.substring(0, selectionStart);
     const afterSelection = text.substring(selectionEnd);
     const newText = beforeSelection + pastedText + afterSelection;
-    
+
     if (newText.length > 10000) {
       e.preventDefault();
       const remainingChars = 10000 - text.length + (selectionEnd - selectionStart);
       toast.error(
         remainingChars > 0
           ? `You can paste up to ${remainingChars} characters`
-          : 'Text would exceed the 10000 character limit'
+          : "Text would exceed the 10000 character limit"
       );
       return;
     }
@@ -87,7 +87,10 @@ export function TextInputForm({ onSubmit, disabled, shouldReset, isLoading }: Te
           disabled={disabled || isLoading}
           data-test-id="generate-text-input"
         />
-        <p className={`text-sm ${text.length > 10000 ? 'text-red-500' : 'text-gray-500'}`} data-test-id="character-count">
+        <p
+          className={`text-sm ${text.length > 10000 ? "text-red-500" : "text-gray-500"}`}
+          data-test-id="character-count"
+        >
           Characters: {text.length} / 10000
           {text.length < 1000 && (
             <span className="text-yellow-500 ml-2" data-test-id="characters-needed">
@@ -103,7 +106,7 @@ export function TextInputForm({ onSubmit, disabled, shouldReset, isLoading }: Te
         </Alert>
       )}
 
-      <GenerateButton 
+      <GenerateButton
         disabled={disabled}
         isTextValid={!error}
         textLength={text.length}
@@ -112,4 +115,4 @@ export function TextInputForm({ onSubmit, disabled, shouldReset, isLoading }: Te
       />
     </form>
   );
-} 
+}

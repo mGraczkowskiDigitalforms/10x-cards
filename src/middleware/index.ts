@@ -1,33 +1,35 @@
-import type { MiddlewareHandler } from 'astro';
-import type { AstroCookies } from 'astro';
-import { createSupabaseServerInstance } from '../db/supabase.server';
-import type { AstroLocals } from '../types';
+import type { MiddlewareHandler } from "astro";
+import type { AstroCookies } from "astro";
+import { createSupabaseServerInstance } from "../db/supabase.server";
+import type { AstroLocals } from "../types";
 
 // Public paths that don't require authentication
 const PUBLIC_PATHS = [
-  '/api/auth/login',
-  '/api/auth/register',
-  '/api/auth/logout',
-  '/api/auth/reset-password',
-  '/api/auth/forgot-password',
-  '/auth/login',
-  '/auth/register',
-  '/auth/forgot-password',
-  '/auth/reset-password'
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/logout",
+  "/api/auth/reset-password",
+  "/api/auth/forgot-password",
+  "/auth/login",
+  "/auth/register",
+  "/auth/forgot-password",
+  "/auth/reset-password",
 ];
 
 // API paths that require authentication
-const API_PATHS = ['/api/'];
+const API_PATHS = ["/api/"];
 
 export const onRequest: MiddlewareHandler = async (context, next) => {
   // Initialize Supabase client for all requests
-  const supabase = createSupabaseServerInstance({ 
+  const supabase = createSupabaseServerInstance({
     cookies: context.cookies as AstroCookies,
-    headers: context.request.headers 
+    headers: context.request.headers,
   });
 
   // Get user from session
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // Add supabase client and user to locals
   context.locals.supabase = supabase;
@@ -39,19 +41,22 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
   }
 
   // Check auth only for API paths
-  if (context.url.pathname.startsWith('/api/')) {
+  if (context.url.pathname.startsWith("/api/")) {
     if (!user) {
-      return new Response(JSON.stringify({
-        error: 'Unauthorized'
-      }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
   } else if (!user) {
     // For non-API paths, redirect to login if not authenticated
-    return context.redirect('/auth/login');
+    return context.redirect("/auth/login");
   }
 
   return next();
-}; 
+};

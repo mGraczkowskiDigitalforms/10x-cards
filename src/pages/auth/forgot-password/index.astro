@@ -1,13 +1,13 @@
 ---
-import AuthLayout from '@/layouts/AuthLayout.astro';
-import { ForgotPasswordForm } from '@/features/auth/components';
-import { Toaster } from '@/components/ui/sonner';
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import { ForgotPasswordForm } from "@/features/auth/components";
+import { Toaster } from "@/components/ui/sonner";
 ---
 
-<AuthLayout 
-  title="Reset your password" 
+<AuthLayout
+  title="Reset your password"
   subtitle="Enter your email address and we'll send you a link to reset your password"
 >
   <ForgotPasswordForm client:load />
   <Toaster client:load />
-</AuthLayout> 
+</AuthLayout>
