@@ -2,7 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
-export function UserPanel() {
+interface UserPanelProps {
+  user: {
+    email: string;
+    lastLoginAt?: string;
+  };
+}
+
+export function UserPanel({ user }: UserPanelProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogout = async () => {
@@ -26,15 +33,18 @@ export function UserPanel() {
   };
 
   return (
-    <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoading}>
-      {isLoading ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Logging out...
-        </>
-      ) : (
-        "Logout"
-      )}
-    </Button>
+    <div className="flex items-center gap-4">
+      <div className="text-sm text-muted-foreground">{user.email}</div>
+      <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoading}>
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Logging out...
+          </>
+        ) : (
+          "Logout"
+        )}
+      </Button>
+    </div>
   );
 }

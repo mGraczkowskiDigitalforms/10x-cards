@@ -39,7 +39,13 @@ describe("ResetPasswordForm", () => {
     const mockResponse = { ok: true, json: () => Promise.resolve({ message: "Password reset successful" }) };
     (global.fetch as Mock).mockResolvedValueOnce(mockResponse);
     const originalLocation = window.location;
-    window.location = { ...originalLocation, href: "" } as Location;
+
+    // Utwórz kopię lokalizacji z typem rozszerzonym o string
+    const customLocation = { href: "" };
+    Object.defineProperty(window, "location", {
+      writable: true,
+      value: customLocation,
+    });
 
     render(<ResetPasswordForm token={token} />);
     const passwordInput = screen.getByLabelText("New Password");
@@ -63,7 +69,11 @@ describe("ResetPasswordForm", () => {
       expect(window.location.href).toBe("/auth/login");
     });
 
-    window.location = originalLocation;
+    // Przywróć oryginalne window.location
+    Object.defineProperty(window, "location", {
+      writable: true,
+      value: originalLocation,
+    });
   });
 
   it("should handle password reset failure", async () => {
@@ -91,7 +101,16 @@ describe("ResetPasswordForm", () => {
   });
 
   it("should handle network error", async () => {
-    (global.fetch as Mock).mockRejectedValueOnce(new Error("Network error"));
+    const errorMessage = "Network error";
+    (global.fetch as Mock).mockRejectedValueOnce(new Error(errorMessage));
+    const originalLocation = window.location;
+
+    // Utwórz kopię lokalizacji z typem rozszerzonym o string
+    const customLocation = { href: "" };
+    Object.defineProperty(window, "location", {
+      writable: true,
+      value: customLocation,
+    });
 
     render(<ResetPasswordForm token={token} />);
     const passwordInput = screen.getByLabelText("New Password");
@@ -105,7 +124,13 @@ describe("ResetPasswordForm", () => {
     await waitFor(() => {
       const alert = screen.getByRole("alert");
       expect(alert).toBeInTheDocument();
-      expect(alert).toHaveTextContent("Network error");
+      expect(alert).toHaveTextContent(errorMessage);
+    });
+
+    // Przywróć oryginalne window.location
+    Object.defineProperty(window, "location", {
+      writable: true,
+      value: originalLocation,
     });
   });
 

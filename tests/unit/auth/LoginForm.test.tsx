@@ -45,7 +45,13 @@ describe("LoginForm", () => {
     const mockResponse = { ok: true, json: () => Promise.resolve({ message: "Login successful" }) };
     (global.fetch as Mock).mockResolvedValueOnce(mockResponse);
     const originalLocation = window.location;
-    window.location = { ...originalLocation, href: "" } as Location;
+
+    // Utwórz kopię lokalizacji z typem rozszerzonym o string
+    const customLocation = { href: "" };
+    Object.defineProperty(window, "location", {
+      writable: true,
+      value: customLocation,
+    });
 
     render(<LoginForm />);
     const emailInput = screen.getByLabelText("Email address");
@@ -69,7 +75,11 @@ describe("LoginForm", () => {
       expect(window.location.href).toBe("/generate");
     });
 
-    window.location = originalLocation;
+    // Przywróć oryginalne window.location
+    Object.defineProperty(window, "location", {
+      writable: true,
+      value: originalLocation,
+    });
   });
 
   it("should handle login failure", async () => {
