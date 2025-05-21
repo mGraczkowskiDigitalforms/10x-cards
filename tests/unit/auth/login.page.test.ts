@@ -1,18 +1,18 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createSupabaseServerInstance } from '../../../src/db/supabase.server';
-import type { AstroCookies } from 'astro';
-import type { APIContext } from 'astro';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { createSupabaseServerInstance } from "../../../src/db/supabase.server";
+import type { AstroCookies } from "astro";
+import type { APIContext } from "astro";
 
 // Mock Supabase client
 const mockGetUser = vi.fn();
 const mockSupabase = {
   auth: {
-    getUser: mockGetUser
-  }
+    getUser: mockGetUser,
+  },
 };
 
-vi.mock('../../../src/db/supabase.server', () => ({
-  createSupabaseServerInstance: vi.fn(() => mockSupabase)
+vi.mock("../../../src/db/supabase.server", () => ({
+  createSupabaseServerInstance: vi.fn(() => mockSupabase),
 }));
 
 // Create mock Astro context
@@ -22,18 +22,18 @@ const createMockAstroContext = () => ({
     has: vi.fn(),
     set: vi.fn(),
     delete: vi.fn(),
-    headers: () => new Headers()
+    headers: () => new Headers(),
   } as unknown as AstroCookies,
-  request: new Request('http://localhost/auth/login'),
-  url: new URL('http://localhost/auth/login'),
+  request: new Request("http://localhost/auth/login"),
+  url: new URL("http://localhost/auth/login"),
   redirect: vi.fn(),
   props: {},
-  site: new URL('http://localhost'),
-  generator: '10x-cards',
-  clientAddress: '127.0.0.1',
-  preferredLocale: 'en',
-  currentLocale: 'en',
-  locals: {}
+  site: new URL("http://localhost"),
+  generator: "10x-cards",
+  clientAddress: "127.0.0.1",
+  preferredLocale: "en",
+  currentLocale: "en",
+  locals: {},
 });
 
 // Mock Astro component
@@ -41,26 +41,28 @@ const mockLoginPage = {
   async render(this: APIContext) {
     const supabase = createSupabaseServerInstance({
       cookies: this.cookies,
-      headers: this.request.headers
+      headers: this.request.headers,
     });
 
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (user) {
-      return this.redirect('/generate');
+      return this.redirect("/generate");
     }
 
     return {
-      props: {}
+      props: {},
     };
-  }
+  },
 };
 
-vi.mock('../../../src/pages/auth/login/index.astro', () => ({
-  default: mockLoginPage
+vi.mock("../../../src/pages/auth/login/index.astro", () => ({
+  default: mockLoginPage,
 }));
 
-describe('Login Page', () => {
+describe("Login Page", () => {
   let mockContext: APIContext;
 
   beforeEach(() => {
@@ -68,26 +70,26 @@ describe('Login Page', () => {
     mockContext = createMockAstroContext() as unknown as APIContext;
   });
 
-  it('should redirect to /generate when user is already logged in', async () => {
+  it("should redirect to /generate when user is already logged in", async () => {
     // Arrange
-    const mockUser = { id: '123', email: 'test@example.com' };
+    const mockUser = { id: "123", email: "test@example.com" };
     mockGetUser.mockResolvedValueOnce({
       data: { user: mockUser },
-      error: null
+      error: null,
     });
 
     // Act
     await mockLoginPage.render.call(mockContext);
 
     // Assert
-    expect(mockContext.redirect).toHaveBeenCalledWith('/generate');
+    expect(mockContext.redirect).toHaveBeenCalledWith("/generate");
   });
 
-  it('should not redirect when user is not logged in', async () => {
+  it("should not redirect when user is not logged in", async () => {
     // Arrange
     mockGetUser.mockResolvedValueOnce({
       data: { user: null },
-      error: null
+      error: null,
     });
 
     // Act
@@ -98,11 +100,11 @@ describe('Login Page', () => {
     expect(result).toEqual({ props: {} });
   });
 
-  it('should handle error during user check', async () => {
+  it("should handle error during user check", async () => {
     // Arrange
     mockGetUser.mockResolvedValueOnce({
       data: { user: null },
-      error: new Error('Failed to get user')
+      error: new Error("Failed to get user"),
     });
 
     // Act
@@ -112,4 +114,4 @@ describe('Login Page', () => {
     expect(mockContext.redirect).not.toHaveBeenCalled();
     expect(result).toEqual({ props: {} });
   });
-}); 
+});
