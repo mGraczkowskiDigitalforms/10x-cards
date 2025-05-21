@@ -132,6 +132,7 @@ Example response format:
       }
     } catch (error) {
       // Log detailed error information
+      // eslint-disable-next-line no-console
       console.error("OpenRouter API error:", {
         error:
           error instanceof Error
@@ -142,7 +143,9 @@ Example response format:
               }
             : error,
         responseError:
-          error instanceof Error && "response" in error ? await (error as any).response?.text() : undefined,
+          error instanceof Error && "response" in error 
+            ? await ((error as { response?: { text: () => Promise<string> } }).response?.text?.() || Promise.resolve("No response text"))
+            : undefined,
       });
 
       const aiError = error as AiServiceError;
@@ -190,6 +193,7 @@ Example response format:
       });
 
       if (error) {
+        // eslint-disable-next-line no-console
         console.error("Failed to log generation error:", {
           error,
           params,
@@ -198,6 +202,7 @@ Example response format:
       }
     } catch (error) {
       // Log to console as last resort if we can't save to database
+      // eslint-disable-next-line no-console
       console.error("Critical error while logging generation error:", {
         error,
         originalError: params,

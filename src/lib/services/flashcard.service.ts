@@ -42,7 +42,10 @@ export class FlashcardService {
       }
 
       // Validate generation_ids if present
-      const generationIds = flashcards.filter((f) => f.generation_id !== null).map((f) => f.generation_id!);
+      const generationIds = flashcards
+        .filter((f) => f.generation_id !== null)
+        .map((f) => f.generation_id ?? 0)
+        .filter((id) => id !== 0);
 
       if (generationIds.length > 0) {
         const invalidGenerationIds = await this.findInvalidGenerationIds(generationIds, userId);

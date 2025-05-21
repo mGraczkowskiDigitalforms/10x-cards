@@ -1,7 +1,6 @@
-import type { MiddlewareHandler, APIContext } from "astro";
+import type { MiddlewareHandler } from "astro";
 import type { AstroCookies } from "astro";
 import { createSupabaseServerInstance } from "../db/supabase.server";
-import type { AstroLocals } from "../types";
 
 // Public paths that don't require authentication
 const PUBLIC_PATHS = ["/api/auth/login", "/api/auth/register", "/api/auth/logout", "/api/auth/reset-password"];

@@ -40,7 +40,7 @@ export interface OpenRouterPayload {
   max_tokens?: number;
   response_format?: {
     type: "json_schema";
-    json_schema: Record<string, any>;
+    json_schema: Record<string, unknown>;
   };
 }
 
@@ -92,7 +92,7 @@ export const responseFormatSchema = z.object({
   name: z.string(),
   schema: z.object({
     type: z.string(),
-    properties: z.record(z.any()),
+    properties: z.record(z.unknown()),
     required: z.array(z.string()),
   }),
 });

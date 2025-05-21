@@ -1,7 +1,6 @@
 import type { MiddlewareHandler } from "astro";
 import type { AstroCookies } from "astro";
 import { createSupabaseServerInstance } from "../db/supabase.server";
-import type { AstroLocals } from "../types";
 
 // Public paths that don't require authentication
 const PUBLIC_PATHS = [
@@ -15,9 +14,6 @@ const PUBLIC_PATHS = [
   "/auth/forgot-password",
   "/auth/reset-password",
 ];
-
-// API paths that require authentication
-const API_PATHS = ["/api/"];
 
 export const onRequest: MiddlewareHandler = async (context, next) => {
   // Initialize Supabase client for all requests
