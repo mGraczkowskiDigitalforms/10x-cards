@@ -142,10 +142,7 @@ Example response format:
                 stack: error.stack,
               }
             : error,
-        responseError:
-          error instanceof Error && "response" in error
-            ? await ((error as { response?: { text: () => Promise<string> } }).response?.text?.() || Promise.resolve("No response text"))
-            : undefined,
+        responseError: await this.getErrorResponseText(error),
       });
 
       const aiError = error as AiServiceError;
@@ -304,5 +301,17 @@ Example response format:
 
       throw new Error(error instanceof Error ? error.message : "Failed to generate flashcards. Please try again.");
     }
+  }
+
+  private async getErrorResponseText(error: unknown): Promise<string | undefined> {
+    if (error instanceof Error && "response" in error) {
+      const errorWithResponse = error as { response?: { text: () => Promise<string> } };
+      try {
+        return await errorWithResponse.response?.text?.() || "No response text";
+      } catch {
+        return "Failed to get response text";
+      }
+    }
+    return undefined;
   }
 }
