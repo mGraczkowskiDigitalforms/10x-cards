@@ -8,7 +8,7 @@ interface ErrorAlertProps extends React.HTMLAttributes<HTMLDivElement> {
   "data-test-id"?: string;
 }
 
-export function ErrorAlert({ errorMessage, onDismiss, "data-test-id": testId, ...props }: ErrorAlertProps) {
+export function ErrorAlert({ errorMessage, onDismiss, "data-test-id": testId }: ErrorAlertProps) {
   return (
     <div data-test-id={testId}>
       <Alert variant="destructive" className="flex items-center justify-between">

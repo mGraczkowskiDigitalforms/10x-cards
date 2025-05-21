@@ -7,9 +7,12 @@ import { AuthInput } from "@/components/ui/AuthInput";
 import { forgotPasswordSchema } from "../schemas/auth.schema";
 import { useAuthService } from "../hooks/useAuthService";
 import type { ForgotPasswordCredentials } from "../types";
+import { useEffect, useState } from "react";
 
 export function ForgotPasswordForm() {
   const { forgotPassword } = useAuthService();
+  const [redirectToReset, setRedirectToReset] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -25,13 +28,19 @@ export function ForgotPasswordForm() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       await forgotPassword(data);
-      window.location.href = "/auth/reset-password";
+      setRedirectToReset(true);
     } catch (err) {
       setError("root", {
         message: err instanceof Error ? err.message : "An unexpected error occurred",
       });
     }
   });
+
+  useEffect(() => {
+    if (redirectToReset) {
+      window.location.href = "/auth/reset-password";
+    }
+  }, [redirectToReset]);
 
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
