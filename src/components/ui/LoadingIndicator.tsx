@@ -31,4 +31,4 @@ export function LoadingIndicator() {
       <FlashcardSkeleton />
     </div>
   );
-} 
+}
