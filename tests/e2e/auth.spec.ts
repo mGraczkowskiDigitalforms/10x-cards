@@ -6,8 +6,8 @@ test.describe("Authentication Flow", () => {
 
   // Test data from .env.test
   const TEST_USER = {
-    email: process.env.E2E_USERNAME!,
-    password: process.env.E2E_PASSWORD!,
+    email: process.env.E2E_USERNAME ?? "missing_username",
+    password: process.env.E2E_PASSWORD ?? "missing_password",
   };
 
   // Verify required environment variables
@@ -41,7 +41,7 @@ test.describe("Authentication Flow", () => {
         try {
           const body = await response.json();
           console.log("Response body:", body);
-        } catch (e) {
+        } catch (_) {
           console.log("Failed to parse response body");
         }
       }

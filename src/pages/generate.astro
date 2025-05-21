@@ -26,6 +26,7 @@ try {
   user = userData;
   lastLoginAt = session?.user?.last_sign_in_at || new Date().toISOString();
 } catch (error) {
+  // eslint-disable-next-line no-console
   console.error("Error getting user:", error);
   return Astro.redirect("/auth/login");
 }
@@ -36,7 +37,7 @@ try {
     client:only="react"
     user={{
       id: user.id,
-      email: user.email!,
+      email: user.email ?? "",
       lastLoginAt,
     }}
   />
